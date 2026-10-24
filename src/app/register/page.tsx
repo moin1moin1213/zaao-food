@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Phone, Lock, Eye, EyeOff, ShieldAlert, ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
+import { User, Phone, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { bdPhoneRegex } from "@/lib/validation/schemas";
@@ -93,7 +93,7 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    const verifyRes = await authService.verifyOtp(phone, otpCode);
+    const verifyRes = await authService.verifyOtp(phone, otpCode, fullName);
     setLoading(false);
 
     if (verifyRes.success) {
@@ -124,16 +124,8 @@ export default function RegisterPage() {
           {step === "form" ? t.auth.registerTitle : t.auth.verifyOtp}
         </h1>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          {step === "form" ? t.auth.registerSubtitle : `${phone} নম্বরে ওটিপি পাঠানো হয়েছে (ডেমো)`}
+          {step === "form" ? t.auth.registerSubtitle : `${phone} নম্বরে ওটিপি কোড পাঠানো হয়েছে`}
         </p>
-      </div>
-
-      {/* Dev notice banner */}
-      <div className="p-3 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/50 flex items-start gap-2 text-xs text-[#FF6B1A]">
-        <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-        <span className="leading-relaxed">
-          {t.auth.rtcomNotice}
-        </span>
       </div>
 
       {step === "form" ? (

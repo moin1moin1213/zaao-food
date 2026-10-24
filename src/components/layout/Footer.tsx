@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { MapPin, Phone, Mail, ShieldAlert } from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
 import { Logo } from "../brand/Logo";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -19,9 +19,9 @@ export function Footer() {
             <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
               {t.footer.aboutText}
             </p>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-orange-100/60 dark:bg-orange-950/40 text-[#FF6B1A] text-xs font-semibold">
-              <ShieldAlert className="w-3.5 h-3.5" />
-              <span>{t.common.devPreview}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>{lang === "bn" ? "অর্ডার সেবা চালু আছে" : "Online Ordering Live"}</span>
             </div>
           </div>
 

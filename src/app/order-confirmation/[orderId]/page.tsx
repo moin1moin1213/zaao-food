@@ -2,7 +2,7 @@
 
 import React, { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ArrowRight, Home, Receipt, MapPin, ShieldAlert, Sparkles, Clock } from "lucide-react";
+import { CheckCircle2, ArrowRight, Home, Receipt, MapPin } from "lucide-react";
 import { orderService } from "@/services/orderService";
 import { Order } from "@/services/types";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -55,10 +55,9 @@ export default function OrderConfirmationPage({ params }: OrderConfirmationProps
           {t.orderConfirmation.subtitle}
         </p>
 
-        {/* Development Preview Banner */}
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-orange-100/70 dark:bg-orange-950/40 text-[#FF6B1A] text-xs font-bold border border-orange-200 dark:border-orange-900/50">
-          <ShieldAlert className="w-4 h-4" />
-          <span>{t.orderConfirmation.previewAlert}</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>{t.orderConfirmation.confirmedNotice}</span>
         </div>
       </div>
 

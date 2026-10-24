@@ -39,10 +39,11 @@ export function RestaurantCard({ restaurant, className = "" }: RestaurantCardPro
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-        {/* Dev Sample Data Tag */}
+        {/* Partner Badge */}
         <div className="absolute top-2.5 left-2.5">
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur-xs">
-            {t.common.devPreview}
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/50 text-white backdrop-blur-xs flex items-center gap-1">
+            <Store className="w-3 h-3 text-[#FF6B1A]" />
+            <span>{lang === "bn" ? "ভেরিফায়েড কিচেন" : "Verified Kitchen"}</span>
           </span>
         </div>
 

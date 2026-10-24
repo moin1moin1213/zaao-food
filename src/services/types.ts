@@ -22,7 +22,6 @@ export interface Restaurant {
   cuisinesBn: string[];
   rating: number;
   reviewCount: number;
-  isDevSample: true;
   isOpen: boolean;
   openingHoursEn: string;
   openingHoursBn: string;
@@ -143,7 +142,6 @@ export interface OrderRider {
 
 export interface Order {
   id: string;
-  isPreview: true; // clearly marks development preview state
   createdAt: string;
   status: OrderStatus;
   items: CartItem[];

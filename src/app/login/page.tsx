@@ -3,16 +3,17 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Phone, Lock, Eye, EyeOff, ShieldAlert, ArrowRight } from "lucide-react";
+import { Phone, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { bdPhoneRegex } from "@/lib/validation/schemas";
+import { authService } from "@/services/authService";
 
 export default function LoginPage() {
   const router = useRouter();
   const { lang, t } = useLanguage();
-  const [phone, setPhone] = useState("01712345678");
-  const [password, setPassword] = useState("password123");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
@@ -39,11 +40,12 @@ export default function LoginPage() {
     }
 
     setLoading(true);
+    authService.login(phone);
     setTimeout(() => {
       setLoading(false);
       // Route to profile or home
       router.push("/profile");
-    }, 600);
+    }, 400);
   };
 
   return (
@@ -59,14 +61,6 @@ export default function LoginPage() {
         <p className="text-xs text-gray-500 dark:text-gray-400">
           {t.auth.loginSubtitle}
         </p>
-      </div>
-
-      {/* Dev notice banner */}
-      <div className="p-3 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/50 flex items-start gap-2 text-xs text-[#FF6B1A]">
-        <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-        <span className="leading-relaxed">
-          {t.auth.rtcomNotice}
-        </span>
       </div>
 
       {/* Login Card Form */}

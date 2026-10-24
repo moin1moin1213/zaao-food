@@ -9,9 +9,6 @@ import {
   Store,
   Bike,
   MapPin,
-  ShieldAlert,
-  AlertCircle,
-  HelpCircle,
   RefreshCw,
 } from "lucide-react";
 import { OrderTimeline } from "@/components/orders/OrderTimeline";
@@ -54,24 +51,7 @@ export default function OrderTrackingPage({ params }: OrderTrackingProps) {
     return () => clearInterval(interval);
   }, [orderId]);
 
-  const handleSimulateNextStage = async () => {
-    if (!order) return;
-    const progression: OrderStatus[] = [
-      "placed",
-      "accepted",
-      "preparing",
-      "ready_for_pickup",
-      "rider_picked_up",
-      "on_the_way",
-      "delivered",
-    ];
-    const currentIndex = progression.indexOf(order.status);
-    if (currentIndex < progression.length - 1) {
-      const nextStatus = progression[currentIndex + 1];
-      const updated = await orderService.updateOrderStatus(order.id, nextStatus);
-      if (updated) setOrder({ ...updated });
-    }
-  };
+
 
   if (loading) {
     return <LoadingSkeleton count={3} />;
@@ -100,7 +80,7 @@ export default function OrderTrackingPage({ params }: OrderTrackingProps) {
           <span>{t.common.back} {t.nav.orders}</span>
         </Link>
 
-        {/* Polling / Refresh control */}
+        {/* Live Refresh control */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -108,19 +88,10 @@ export default function OrderTrackingPage({ params }: OrderTrackingProps) {
               setIsRefreshing(true);
               loadOrder();
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-            <span>{lang === "bn" ? "রিফ্রেশ" : "Refresh Status"}</span>
-          </button>
-
-          {/* Test Stage Advancement Button for Dev Review */}
-          <button
-            type="button"
-            onClick={handleSimulateNextStage}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs"
-          >
-            {lang === "bn" ? "পরবর্তী ধাপ টেস্ট করুন" : "Advance Stage (Dev)"}
+            <span>{lang === "bn" ? "স্ট্যাটাস রিফ্রেশ" : "Refresh Status"}</span>
           </button>
         </div>
       </div>

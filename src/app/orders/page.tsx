@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Receipt, ArrowRight, RotateCcw, Clock, ShieldAlert } from "lucide-react";
+import { Receipt, ArrowRight, RotateCcw, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
@@ -38,7 +38,7 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="border-b border-gray-100 dark:border-gray-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="border-b border-gray-100 dark:border-gray-800 pb-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-gray-100">
             {t.orders.title}
@@ -46,11 +46,6 @@ export default function OrdersPage() {
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {t.orders.subtitle}
           </p>
-        </div>
-
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-orange-100/60 dark:bg-orange-950/40 text-[#FF6B1A] text-xs font-semibold self-start sm:self-auto">
-          <ShieldAlert className="w-3.5 h-3.5" />
-          <span>{t.common.devPreview}</span>
         </div>
       </div>
 
@@ -124,7 +119,7 @@ export default function OrdersPage() {
                   </div>
                 </div>
 
-                {/* Items Summary preview */}
+                {/* Items Summary */}
                 <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                   {order.items.map((item) => (
                     <div key={item.cartItemId} className="flex justify-between items-center">

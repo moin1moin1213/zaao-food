@@ -11,7 +11,6 @@ import {
   FileText,
   CreditCard,
   Banknote,
-  ShieldAlert,
   ArrowRight,
   CheckCircle2,
   AlertCircle,
@@ -20,6 +19,7 @@ import { MapLocationPicker } from "@/components/checkout/MapLocationPicker";
 import { checkoutFormSchema, CheckoutFormData } from "@/lib/validation/schemas";
 import { useCart } from "@/services/cartStore";
 import { orderService } from "@/services/orderService";
+import { authService } from "@/services/authService";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { POPULAR_LOCATIONS } from "@/lib/pricing/deliveryZoneService";
 
@@ -32,6 +32,8 @@ export default function CheckoutPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | undefined>();
 
+  const currentUser = authService.getCurrentUser();
+
   const {
     register,
     handleSubmit,
@@ -40,9 +42,9 @@ export default function CheckoutPage() {
     formState: { errors },
   } = useForm<CheckoutFormData>({
     defaultValues: {
-      fullName: "Tanvir Hasan",
-      phone: "01712345678",
-      address: "Holding 24, College Road, Mathbaria",
+      fullName: currentUser?.name || "",
+      phone: currentUser?.phone || "",
+      address: currentUser?.addresses?.[0]?.address || "",
       area: selectedLocation.nameEn,
       instructions: "",
       paymentMethod: "cod",
@@ -75,8 +77,8 @@ export default function CheckoutPage() {
     }
 
     try {
-      // Create development preview order
-      const newOrder = await orderService.createPreviewOrder({
+      // Create confirmed customer order
+      const newOrder = await orderService.createOrder({
         items,
         customer: {
           name: data.fullName,
@@ -106,7 +108,7 @@ export default function CheckoutPage() {
       setErrorMsg(
         lang === "bn"
           ? "অর্ডার প্রসেস করার সময় একটি সমস্যা হয়েছে।"
-          : "An error occurred while creating order preview."
+          : "An error occurred while creating order."
       );
     } finally {
       setIsSubmitting(false);
@@ -120,10 +122,9 @@ export default function CheckoutPage() {
         <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-gray-100">
           {t.checkout.title}
         </h1>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-orange-100/60 dark:bg-orange-950/40 text-[#FF6B1A] text-xs font-semibold mt-1">
-          <ShieldAlert className="w-3.5 h-3.5" />
-          <span>{t.common.devPreviewNotice}</span>
-        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {lang === "bn" ? "ডেলিভারি ঠিকানা ও যোগাযোগের সঠিক তথ্য নিশ্চিত করুন" : "Confirm delivery address and contact information"}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -355,10 +356,6 @@ export default function CheckoutPage() {
                 </>
               )}
             </button>
-
-            <div className="text-[11px] text-gray-400 text-center leading-relaxed">
-              {t.common.devPreviewNotice}
-            </div>
           </div>
         </div>
       </form>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search, Store, ShieldAlert } from "lucide-react";
+import { Search, Store } from "lucide-react";
 import { RestaurantCard } from "@/components/catalog/RestaurantCard";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -47,11 +47,6 @@ export default function RestaurantsPage() {
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
               {t.restaurants.subtitle}
             </p>
-          </div>
-
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#FF6B1A] text-xs font-semibold self-start sm:self-auto">
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>{t.common.devPreviewNotice}</span>
           </div>
         </div>
 

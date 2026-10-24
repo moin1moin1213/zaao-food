@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Trash2, ArrowRight, ShoppingBag, MapPin, Tag, ShieldAlert } from "lucide-react";
+import { Trash2, ArrowRight, ShoppingBag, MapPin, Tag } from "lucide-react";
 import { CartItemRow } from "@/components/cart/CartItemRow";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -163,11 +163,6 @@ export default function CartPage() {
               <span>{t.cart.proceedToCheckout}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
-
-            <div className="text-[11px] text-gray-400 text-center flex items-center justify-center gap-1">
-              <ShieldAlert className="w-3.5 h-3.5 text-gray-400" />
-              <span>{t.common.devPreview}</span>
-            </div>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Phone, Lock, ArrowLeft, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { Phone, Lock, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { bdPhoneRegex } from "@/lib/validation/schemas";
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
       setSuccessMsg(
         lang === "bn"
           ? "পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে! লগইন পেজে নিয়ে যাওয়া হচ্ছে..."
-          : "Password reset successfully in preview mode! Redirecting..."
+          : "Password reset successfully! Redirecting to login..."
       );
       setTimeout(() => router.push("/login"), 1500);
     }, 600);
@@ -78,13 +78,6 @@ export default function ForgotPasswordPage() {
         <p className="text-xs text-gray-500 dark:text-gray-400">
           {t.auth.forgotSubtitle}
         </p>
-      </div>
-
-      <div className="p-3 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/50 flex items-start gap-2 text-xs text-[#FF6B1A]">
-        <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-        <span className="leading-relaxed">
-          {t.auth.rtcomNotice}
-        </span>
       </div>
 
       {step === "phone" ? (

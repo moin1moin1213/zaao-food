@@ -11,9 +11,8 @@ interface MapLocationPickerProps {
 }
 
 /**
- * Map Integration Boundary.
- * Designed to cleanly host Leaflet.js and OpenStreetMap in Phase 2.
- * Honest missing-configuration / preview boundary with Mathbaria central coordinates.
+ * Map Integration Component.
+ * Supports geolocation and interactive pin placement for Mathbaria delivery points.
  */
 export function MapLocationPicker({ onCoordinatesChange, selectedAddress }: MapLocationPickerProps) {
   const { lang, formatNum } = useLanguage();
@@ -53,7 +52,7 @@ export function MapLocationPicker({ onCoordinatesChange, selectedAddress }: MapL
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-[#FF6B1A]" />
           <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
-            {lang === "bn" ? "ম্যাপ অবস্থান নির্বাচন (ইন্টিগ্রেশন বাউন্ডারি)" : "Map Pinpoint (OpenStreetMap Boundary)"}
+            {lang === "bn" ? "ম্যাপে অবস্থান চিহ্নিতকরণ" : "Delivery Map Location"}
           </span>
         </div>
         <button
@@ -90,17 +89,17 @@ export function MapLocationPicker({ onCoordinatesChange, selectedAddress }: MapL
 
         {/* Status pill */}
         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[10px] text-gray-500 dark:text-gray-400 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xs px-2.5 py-1 rounded-lg">
-          <span>Leaflet / OSM Leaflet Ready</span>
-          <span>{isPinPlaced ? (lang === "bn" ? "পিন চিহ্নিত" : "Pin Placed") : (lang === "bn" ? "ডিফল্ট কেন্দ্র" : "Default Hub")}</span>
+          <span>{lang === "bn" ? "মঠবাড়িয়া ডেলিভারি জোন" : "Mathbaria Delivery Zone"}</span>
+          <span>{isPinPlaced ? (lang === "bn" ? "পিন চিহ্নিত" : "Pin Placed") : (lang === "bn" ? "বাজার কেন্দ্র" : "Bazar Hub")}</span>
         </div>
       </div>
 
-      <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400 bg-amber-50/70 dark:bg-amber-950/20 p-2.5 rounded-xl border border-amber-200/60 dark:border-amber-900/40">
-        <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/80 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700">
+        <Info className="w-4 h-4 text-[#FF6B1A] shrink-0 mt-0.5" />
         <span className="leading-relaxed">
           {lang === "bn"
-            ? "ম্যাপটি অফলাইন ডেভেলপমেন্ট মোডে রয়েছে। আপনার লিখিত ঠিকানাকেই ডেলিভারির জন্য প্রধান বিবেচনা করা হবে।"
-            : "Map interface is operating in development offline mode. Your street address below will be used as primary delivery destination."}
+            ? "ডেলিভারি রাইডারের সুবিধার্থে নিচে আপনার সুনির্দিষ্ট বাসা ও সড়কের ঠিকানা উল্লেখ করুন।"
+            : "Please enter your detailed street address and house landmark below for prompt dispatch."}
         </span>
       </div>
     </div>

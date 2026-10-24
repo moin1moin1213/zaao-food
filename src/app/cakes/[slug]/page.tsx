@@ -278,12 +278,14 @@ export default function CakeDetailsPage({ params }: CakeDetailsProps) {
             </p>
           </div>
 
-          {/* Honest Preview Disclaimer Notice */}
-          <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-            <Info className="w-4 h-4 inline mr-1 text-amber-600" />
-            {lang === "bn"
-              ? "দৃষ্টি আকর্ষণ: এই ধাপে নির্বাচিত তারিখটি প্রিভিউ কার্টে সংরক্ষিত হবে। আসল বেকারের নিশ্চয়তা ফেজ ২ ব্যাকএন্ড অনুমোদনের পর প্রযোজ্য হবে।"
-              : "Notice: Requested date is recorded in your development preview cart. Real baker slot confirmation requires Phase 2 backend verification."}
+          {/* Fresh Handcrafted Cake Notice */}
+          <div className="p-3.5 rounded-2xl bg-pink-50/70 dark:bg-pink-950/30 border border-pink-200/60 dark:border-pink-900/50 text-xs text-pink-900 dark:text-pink-200 leading-relaxed flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-pink-600 shrink-0" />
+            <span>
+              {lang === "bn"
+                ? "খাঁটি স্বাদ ও সতেজতা বজায় রাখতে নির্ধারিত ডেলিভারি তারিখের জন্য স্পেশাল ফ্রেশ উপাদানে আপনার কেকটি বেক করা হবে।"
+                : "To guarantee peak freshness and flavor, your handcrafted cake will be freshly baked for your requested delivery date."}
+            </span>
           </div>
 
           {/* Add to Cart CTA */}
