@@ -1,7 +1,7 @@
 import { UserProfile } from "./types";
 import { safeLocalStorageGet, safeLocalStorageSet, safeLocalStorageRemove } from "@/lib/storage/safeStorage";
 
-const USER_SESSION_KEY = "zaao_customer_session";
+const USER_SESSION_KEY = "pengufood_customer_session";
 
 export interface SendOtpResult {
   success: boolean;
@@ -24,7 +24,7 @@ export const authService = {
     const existing = this.getCurrentUser();
     const user: UserProfile = {
       id: existing?.id || `usr-${Date.now()}`,
-      name: name || existing?.name || "Zaao Customer",
+      name: name || existing?.name || "PenguFood Customer",
       phone,
       isLoggedIn: true,
       addresses: existing?.addresses || [

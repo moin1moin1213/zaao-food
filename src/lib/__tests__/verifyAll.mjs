@@ -1,4 +1,4 @@
-// Automated test verification script for Zaao Food Phase 1 Business Rules
+// Automated test verification script for PenguFood Phase 1 Business Rules
 
 import assert from "node:assert";
 
@@ -68,7 +68,7 @@ function calculateDeliveryFee(distanceKm, isCakeOrder, isOnlyCakes = isCakeOrder
 // 3. Bangladeshi phone validation
 const bdPhoneRegex = /^01[3-9]\d{8}$/;
 
-console.log("=== RUNNING ZAAO FOOD VERIFICATION TESTS ===");
+console.log("=== RUNNING PENGUFOOD VERIFICATION TESTS ===");
 
 // TEST 1: Currency & Numerals
 console.log("\n[TEST 1] Currency & Bengali Numeral Formatting...");

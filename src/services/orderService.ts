@@ -22,13 +22,13 @@ export const orderService = {
   }): Promise<Order> {
     const orderNum = Math.floor(10000 + Math.random() * 90000);
     const newOrder: Order = {
-      id: `ZF-${orderNum}`,
+      id: `PF-${orderNum}`,
       createdAt: new Date().toISOString(),
       status: "placed",
       items: params.items,
       restaurantId: params.items[0]?.restaurantId || "rest-unknown",
-      restaurantNameEn: params.items[0]?.restaurantNameEn || "Zaao Food Kitchen",
-      restaurantNameBn: params.items[0]?.restaurantNameBn || "ঝাও ফুড কিচেন",
+      restaurantNameEn: params.items[0]?.restaurantNameEn || "PenguFood Kitchen",
+      restaurantNameBn: params.items[0]?.restaurantNameBn || "পেঙ্গুফুড কিচেন",
       restaurantPhone: "+880 1711-223344",
       customer: params.customer,
       pricing: params.pricing,
@@ -36,7 +36,7 @@ export const orderService = {
       paymentStatus: "pending",
       estimatedDeliveryMinutes: 30,
       rider: {
-        name: "Zaao Delivery Rider",
+        name: "PenguFood Delivery Rider",
         phone: "+880 1819-998877",
         vehicle: "Delivery Bike",
       },

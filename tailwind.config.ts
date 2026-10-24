@@ -10,6 +10,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        pengu: {
+          primary: "#FF6B1A",
+          hover: "#E85B0D",
+          light: "#FFF4ED",
+          dark: "#D6520B",
+          charcoal: "#202124",
+          softgray: "#F3F4F6",
+          darkbg: "#121316",
+          darkcard: "#1E2024",
+          darkborder: "#2C2F36",
+        },
         zaao: {
           primary: "#FF6B1A",
           hover: "#E85B0D",

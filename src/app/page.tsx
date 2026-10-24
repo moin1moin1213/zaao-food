@@ -254,7 +254,7 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 7. Value Propositions / Why Zaao Food */}
+      {/* 7. Value Propositions / Why PenguFood */}
       <section className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-850 p-6 sm:p-8">
         <h2 className="text-base sm:text-lg font-black text-center text-gray-900 dark:text-gray-100 mb-6">
           {t.home.whyZaao}

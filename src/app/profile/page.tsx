@@ -243,8 +243,8 @@ export default function ProfilePage() {
             <div className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed space-y-3">
               <p>
                 {lang === "bn"
-                  ? "ঝাও ফুড (মঠবাড়িয়া, পিরোজপুর) গ্রাহকের ব্যক্তিগত তথ্যের সর্বোচ্চ সুরক্ষা দিতে প্রতিশ্রুতিবদ্ধ। গ্রাহকের ফোন নম্বর ও ডেলিভারি ঠিকানা শুধুমাত্র খাদ্য ও কেক ডেলিভারি সম্পন্ন করার কাজে ব্যবহার করা হয়।"
-                  : "Zaao Food (Mathbaria, Pirojpur) is dedicated to protecting customer data integrity. Phone numbers and locations are utilized exclusively for fulfilling food and cake deliveries."}
+                  ? "পেঙ্গুফুড (মঠবাড়িয়া, পিরোজপুর) গ্রাহকের ব্যক্তিগত তথ্যের সর্বোচ্চ সুরক্ষা দিতে প্রতিশ্রুতিবদ্ধ। গ্রাহকের ফোন নম্বর ও ডেলিভারি ঠিকানা শুধুমাত্র খাদ্য ও কেক ডেলিভারি সম্পন্ন করার কাজে ব্যবহার করা হয়।"
+                  : "PenguFood (Mathbaria, Pirojpur) is dedicated to protecting customer data integrity. Phone numbers and locations are utilized exclusively for fulfilling food and cake deliveries."}
               </p>
               <p>
                 {lang === "bn"

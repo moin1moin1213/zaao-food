@@ -277,8 +277,8 @@ export const MOCK_FOODS: FoodItem[] = [
   {
     id: "food-7",
     slug: "double-patty-cheese-burger",
-    nameEn: "Zaao Monster Double Patty Cheese Burger",
-    nameBn: "ঝাও মনস্টার ডাবল চিজ বার্গার",
+    nameEn: "Pengu Monster Double Patty Cheese Burger",
+    nameBn: "পেঙ্গু মনস্টার ডাবল চিজ বার্গার",
     descriptionEn: "Two grilled juicy chicken patties with melted cheddar cheese, fresh lettuce, and secret sauce.",
     descriptionBn: "দুই লেয়ারের গ্রিলড চিকেন প্যাটি, গলিত শেডার চিজ, ফ্রেশ লেটুস ও স্পেশাল বার্গার সস।",
     price: 190,
@@ -471,8 +471,8 @@ export const MOCK_FOODS: FoodItem[] = [
 export const MOCK_NOTIFICATIONS: NotificationItem[] = [
   {
     id: "notif-1",
-    titleEn: "Welcome to Zaao Food Mathbaria!",
-    titleBn: "ঝাও ফুড মঠবাড়িয়াতে আপনাকে স্বাগতম!",
+    titleEn: "Welcome to PenguFood Mathbaria!",
+    titleBn: "পেঙ্গুফুড মঠবাড়িয়াতে আপনাকে স্বাগতম!",
     messageEn: "Discover top local restaurants and homemade cakes with swift delivery.",
     messageBn: "মঠবাড়িয়ার সেরা রেস্তোরাঁ ও হোমমেড কেকের স্বাদ নিন আপনার পছন্দের ঠিকানায়।",
     category: "system",

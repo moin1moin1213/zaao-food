@@ -7,10 +7,15 @@ import { Footer } from "@/components/layout/Footer";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Zaao Food — Local Food & Homemade Cake Delivery in Mathbaria",
-  description: "Mathbaria's dedicated local food and handcrafted homemade cake delivery service. Fresh, authentic meals and celebration cakes dispatched straight to your door.",
+  title: "PenguFood — Food & Homemade Cake Delivery | Mathbaria",
+  description: "Mathbaria's dedicated local food and handcrafted homemade cake delivery service. Fresh, authentic meals and celebration cakes dispatched straight to your door by PenguFood.",
   icons: {
-    icon: "/zaao-logo-light.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png" },
+      { url: "/pengu-icon.png", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
   },
 };
 

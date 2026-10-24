@@ -4,7 +4,8 @@
  * and maintains schema versions.
  */
 
-const STORAGE_PREFIX = "zaao_storage_";
+const STORAGE_PREFIX = "pengufood_storage_";
+const LEGACY_STORAGE_PREFIX = "zaao_storage_";
 const CURRENT_VERSION = 1;
 
 interface StorageEnvelope<T> {
@@ -19,7 +20,10 @@ export function safeLocalStorageGet<T>(key: string, fallback: T): T {
   }
 
   try {
-    const raw = window.localStorage.getItem(`${STORAGE_PREFIX}${key}`);
+    let raw = window.localStorage.getItem(`${STORAGE_PREFIX}${key}`);
+    if (!raw) {
+      raw = window.localStorage.getItem(`${LEGACY_STORAGE_PREFIX}${key}`);
+    }
     if (!raw) return fallback;
 
     const parsed: StorageEnvelope<T> = JSON.parse(raw);
