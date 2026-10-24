@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: "Zaao Food — Local Food & Homemade Cake Delivery in Mathbaria",
   description: "Mathbaria's dedicated local food and handcrafted homemade cake delivery service. Fresh, authentic meals and celebration cakes dispatched straight to your door.",
   icons: {
-    icon: "/zaaofood-logo.svg",
+    icon: "/zaao-logo-light.png",
   },
 };
 
