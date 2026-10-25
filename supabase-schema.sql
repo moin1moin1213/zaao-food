@@ -112,19 +112,60 @@ CREATE TABLE IF NOT EXISTS public.riders (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 7. Realtime Enablement (for live order status updates)
+-- 7. Promotional Banners Table (Manageable from Admin Panel)
+CREATE TABLE IF NOT EXISTS public.banners (
+    id TEXT PRIMARY KEY DEFAULT ('bnr_' || substr(md5(random()::text), 1, 8)),
+    badge_en TEXT DEFAULT 'Mathbaria Local Food Delivery',
+    badge_bn TEXT DEFAULT 'মঠবাড়িয়া স্পেশাল ডেলিভারি',
+    title_en TEXT NOT NULL,
+    title_bn TEXT NOT NULL,
+    subtitle_en TEXT,
+    subtitle_bn TEXT,
+    link TEXT NOT NULL DEFAULT '/foods',
+    button_text_en TEXT DEFAULT 'Browse Foods',
+    button_text_bn TEXT DEFAULT 'খাবার দেখুন',
+    secondary_link TEXT DEFAULT '/cakes',
+    secondary_text_en TEXT DEFAULT 'Order Cake',
+    secondary_text_bn TEXT DEFAULT 'কেক অর্ডার',
+    image_url TEXT,
+    bg_gradient TEXT DEFAULT 'from-[#FF6B1A] via-[#E85B0D] to-[#9E3905]',
+    is_active BOOLEAN DEFAULT true,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 8. App Settings & Delivery Config Table (Manageable from Admin Panel)
+CREATE TABLE IF NOT EXISTS public.app_settings (
+    key TEXT PRIMARY KEY,
+    value JSONB NOT NULL,
+    description TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Initial seed for delivery fees and platform status
+INSERT INTO public.app_settings (key, value, description)
+VALUES 
+  ('delivery_rates', '{"regular_0_2": 40, "regular_2_3": 60, "cake_0_3": 100, "cake_3_8": 150}'::jsonb, 'Delivery fees by zone in BDT'),
+  ('platform_status', '{"is_accepting_orders": true, "notice_en": "", "notice_bn": ""}'::jsonb, 'Global store status and maintenance notice')
+ON CONFLICT (key) DO NOTHING;
+
+-- 9. Realtime Enablement (for live order status updates)
 ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
 
--- 8. Row Level Security (RLS) Configuration
+-- 10. Row Level Security (RLS) Configuration
 ALTER TABLE public.restaurants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
 
--- Public can read catalog data
+-- Public can read catalog and banners
 CREATE POLICY "Public can read restaurants" ON public.restaurants FOR SELECT USING (true);
 CREATE POLICY "Public can read categories" ON public.categories FOR SELECT USING (true);
 CREATE POLICY "Public can read products" ON public.products FOR SELECT USING (true);
+CREATE POLICY "Public can read banners" ON public.banners FOR SELECT USING (is_active = true);
+CREATE POLICY "Public can read settings" ON public.app_settings FOR SELECT USING (true);
 
 -- Customers can insert orders
 CREATE POLICY "Public can place orders" ON public.orders FOR INSERT WITH CHECK (true);

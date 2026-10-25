@@ -94,6 +94,32 @@ export interface CartItem {
   specialInstructions?: string;
 }
 
+export interface PromoBanner {
+  id: string;
+  badgeEn?: string;
+  badgeBn?: string;
+  titleEn: string;
+  titleBn: string;
+  subtitleEn: string;
+  subtitleBn: string;
+  link: string;
+  buttonTextEn?: string;
+  buttonTextBn?: string;
+  secondaryLink?: string;
+  secondaryTextEn?: string;
+  secondaryTextBn?: string;
+  imageUrl?: string;
+  bgGradient?: string;
+  isActive: boolean;
+}
+
+export interface DeliveryFeeRates {
+  regular_0_2: number;
+  regular_2_3: number;
+  cake_0_3: number;
+  cake_3_8: number;
+}
+
 export type DeliveryZoneType = 'regular_0_2' | 'regular_2_3' | 'special_cake_3_8' | 'out_of_zone';
 
 export interface DeliveryFeeCalculation {

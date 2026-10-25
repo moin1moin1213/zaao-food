@@ -10,7 +10,7 @@ import { RestaurantCard } from "@/components/catalog/RestaurantCard";
 import { CakeCard } from "@/components/catalog/CakeCard";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import { catalogService } from "@/services/catalogService";
-import { Category, FoodItem, Restaurant } from "@/services/types";
+import { Category, FoodItem, Restaurant, PromoBanner } from "@/services/types";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function HomePage() {
@@ -20,23 +20,26 @@ export default function HomePage() {
   const [recommendedFoods, setRecommendedFoods] = useState<FoodItem[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [cakes, setCakes] = useState<FoodItem[]>([]);
+  const [heroBanner, setHeroBanner] = useState<PromoBanner | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [cats, pop, rec, rests, cakeList] = await Promise.all([
+        const [cats, pop, rec, rests, cakeList, banner] = await Promise.all([
           catalogService.getCategories(),
           catalogService.getFoods({ isPopular: true }),
           catalogService.getFoods({ isRecommended: true }),
           catalogService.getRestaurants(),
           catalogService.getCakes(),
+          catalogService.getHeroBanner(),
         ]);
         setCategories(cats);
         setPopularFoods(pop.filter((f) => !f.isCake).slice(0, 4));
         setRecommendedFoods(rec.filter((f) => !f.isCake).slice(0, 4));
         setRestaurants(rests.slice(0, 3));
         setCakes(cakeList.slice(0, 3));
+        setHeroBanner(banner);
       } catch (err) {
         console.error("Error loading home catalog:", err);
       } finally {
@@ -48,40 +51,58 @@ export default function HomePage() {
 
   return (
     <div className="space-y-10 sm:space-y-12">
-      {/* 1. Hero Promotional Banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FF6B1A] via-[#E85B0D] to-[#9E3905] text-white p-6 sm:p-10 lg:p-12 shadow-lg">
+      {/* 1. Hero Promotional Banner (Admin Manageable) */}
+      <section className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${heroBanner?.bgGradient || "from-[#FF6B1A] via-[#E85B0D] to-[#9E3905]"} text-white p-6 sm:p-10 lg:p-12 shadow-lg`}>
         {/* Subtle background graphic */}
         <div className="absolute -right-12 -bottom-12 w-64 h-64 sm:w-96 sm:h-96 rounded-full bg-white/10 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 max-w-2xl space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-white/20 backdrop-blur-md shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-            <span>{lang === "bn" ? "মঠবাড়িয়া স্পেশাল ডেলিভারি" : "Mathbaria Local Food Delivery"}</span>
+            <span>
+              {lang === "bn"
+                ? (heroBanner?.badgeBn || "মঠবাড়িয়া স্পেশাল ডেলিভারি")
+                : (heroBanner?.badgeEn || "Mathbaria Local Food Delivery")}
+            </span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-            {t.home.heroTitle}
+            {lang === "bn"
+              ? (heroBanner?.titleBn || t.home.heroTitle)
+              : (heroBanner?.titleEn || t.home.heroTitle)}
           </h1>
 
           <p className="text-sm sm:text-base text-orange-100 leading-relaxed max-w-xl">
-            {t.home.heroSubtitle}
+            {lang === "bn"
+              ? (heroBanner?.subtitleBn || t.home.heroSubtitle)
+              : (heroBanner?.subtitleEn || t.home.heroSubtitle)}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
-              href="/foods"
+              href={heroBanner?.link || "/foods"}
               className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold bg-white text-[#FF6B1A] hover:bg-orange-50 shadow-md transition-transform active:scale-95"
             >
-              <span>{t.home.browseFoods}</span>
+              <span>
+                {lang === "bn"
+                  ? (heroBanner?.buttonTextBn || t.home.browseFoods)
+                  : (heroBanner?.buttonTextEn || t.home.browseFoods)}
+              </span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 
-            <Link
-              href="/cakes"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold bg-black/25 hover:bg-black/35 text-white border border-white/20 backdrop-blur-xs transition-all active:scale-95"
-            >
-              <span>🎂 {t.home.orderCake}</span>
-            </Link>
+            {heroBanner?.secondaryLink && (
+              <Link
+                href={heroBanner.secondaryLink}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold bg-black/25 hover:bg-black/35 text-white border border-white/20 backdrop-blur-xs transition-all active:scale-95"
+              >
+                <span>
+                  🎂 {lang === "bn"
+                    ? (heroBanner.secondaryTextBn || t.home.orderCake)
+                    : (heroBanner.secondaryTextEn || t.home.orderCake)}
+                </span>
+              </Link>
+            )}
           </div>
         </div>
       </section>

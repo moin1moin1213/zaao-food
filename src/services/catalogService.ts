@@ -1,4 +1,4 @@
-import { Category, FoodItem, Restaurant } from "./types";
+import { Category, FoodItem, Restaurant, PromoBanner } from "./types";
 import { MOCK_CATEGORIES, MOCK_FOODS, MOCK_RESTAURANTS } from "./mockData";
 
 export interface CatalogFilterOptions {
@@ -116,5 +116,25 @@ export const catalogService = {
   async getCakeBySlug(slug: string): Promise<FoodItem | null> {
     const item = MOCK_FOODS.find((f) => f.slug === slug && f.isCake);
     return item || null;
+  },
+
+  async getHeroBanner(): Promise<PromoBanner> {
+    return {
+      id: "bnr-default",
+      badgeEn: "Mathbaria Local Food Delivery",
+      badgeBn: "মঠবাড়িয়া স্পেশাল ডেলিভারি",
+      titleEn: "Fresh Flavors & Custom Cakes Delivered Across Mathbaria",
+      titleBn: "মঠবাড়িয়ার সেরা রেস্তোরাঁ ও হোমমেড কেক আপনার ঠিকানায়",
+      subtitleEn: "Order mouthwatering biryani, traditional meals, fast food, and bespoke celebration cakes.",
+      subtitleBn: "মঠবাড়িয়া বাজারের ঐতিহ্যবাহী খাবার, বিরিয়ানি ও হোমমেড কেক সহজে অর্ডার করুন দ্রুত ডেলিভারিতে।",
+      link: "/foods",
+      buttonTextEn: "Browse Foods",
+      buttonTextBn: "সকল খাবার দেখুন",
+      secondaryLink: "/cakes",
+      secondaryTextEn: "Order Cake",
+      secondaryTextBn: "কেক অর্ডার করুন",
+      bgGradient: "from-[#FF6B1A] via-[#E85B0D] to-[#9E3905]",
+      isActive: true,
+    };
   },
 };
