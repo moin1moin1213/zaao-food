@@ -16,7 +16,7 @@ export const catalogService = {
           .select("*")
           .order("display_order", { ascending: true });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           return data.map((c) => ({
             id: c.id,
             slug: c.slug,
@@ -28,6 +28,7 @@ export const catalogService = {
             isCakeCategory: c.slug === "cakes",
           }));
         }
+        return [];
       } catch (err) {
         console.warn("Supabase categories query error, using local fallback:", err);
       }
@@ -48,7 +49,7 @@ export const catalogService = {
           .select("*")
           .order("rating", { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           let results: Restaurant[] = data.map((r) => ({
             id: r.id,
             slug: r.slug,
@@ -82,6 +83,7 @@ export const catalogService = {
           }
           return results;
         }
+        return [];
       } catch (err) {
         console.warn("Supabase restaurants query error, using local fallback:", err);
       }
@@ -129,7 +131,7 @@ export const catalogService = {
         }
 
         const { data, error } = await query;
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           let list: FoodItem[] = data.map((p) => ({
             id: p.id,
             slug: p.slug,
@@ -181,6 +183,7 @@ export const catalogService = {
           }
           return list;
         }
+        return [];
       } catch (err) {
         console.warn("Supabase products query error, using local fallback:", err);
       }

@@ -17,60 +17,54 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const trimmedOtp = String(otp).trim();
     const record = otpStore.get(phone);
 
-    // If OTP exists in cache and hasn't expired
-    if (record) {
-      if (Date.now() > record.expiresAt) {
-        otpStore.delete(phone);
-        return NextResponse.json(
-          {
-            success: false,
-            messageEn: "OTP code has expired. Please request a new one.",
-            messageBn: "ওটিপি কোডের মেয়াদ শেষ হয়েছে। অনুগ্রহ করে আবার কোড চান।",
-          },
-          { status: 400 }
-        );
-      }
-
-      if (record.code === otp.trim()) {
-        otpStore.delete(phone); // Verified, consume OTP
-        return NextResponse.json({
-          success: true,
-          messageEn: "Phone number verified successfully.",
-          messageBn: "মোবাইল নম্বর সফলভাবে যাচাই হয়েছে।",
-        });
-      }
-    }
-
-    // Fallback: If 6 digits and cache was restarted or standard verification
-    if (otp.trim().length === 6 && record && record.code !== otp.trim()) {
+    if (!record) {
       return NextResponse.json(
         {
           success: false,
-          messageEn: "Invalid OTP code. Please check and try again.",
-          messageBn: "ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক কোড দিন।",
+          messageEn: "No active OTP request found for this number. Please request a new code.",
+          messageBn: "এই নম্বরে কোনো সচল ওটিপি পাওয়া যায়নি। নতুন কোড রিকোয়েস্ট করুন।",
         },
         { status: 400 }
       );
     }
 
-    // When cache has no record (e.g. server restart) but 6 digits provided
-    if (otp.trim().length === 6) {
-      return NextResponse.json({
-        success: true,
-        messageEn: "Phone number verified successfully.",
-        messageBn: "মোবাইল নম্বর সফলভাবে যাচাই হয়েছে।",
-      });
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(phone);
+      return NextResponse.json(
+        {
+          success: false,
+          messageEn: "OTP code has expired. Please request a new code.",
+          messageBn: "ওটিপি কোডের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে আবার কোড চান।",
+        },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json(
-      { success: false, messageEn: "Please enter a valid 6-digit code", messageBn: "সঠিক ৬ ডিজিটের কোড দিন" },
-      { status: 400 }
-    );
+    if (record.code !== trimmedOtp) {
+      return NextResponse.json(
+        {
+          success: false,
+          messageEn: "Incorrect OTP code. Please enter the exact code received via SMS.",
+          messageBn: "ভুল ওটিপি কোড। অনুগ্রহ করে এসএমএসে আসা সঠিক কোডটি লিখুন।",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Code matches! Consume it so it cannot be re-used
+    otpStore.delete(phone);
+
+    return NextResponse.json({
+      success: true,
+      messageEn: "Mobile number verified successfully.",
+      messageBn: "মোবাইল নম্বর সফলভাবে যাচাই হয়েছে।",
+    });
   } catch (err: any) {
     return NextResponse.json(
-      { success: false, messageEn: "Internal server error", messageBn: "সার্ভারে সমস্যা হয়েছে" },
+      { success: false, messageEn: "Internal server error", messageBn: "সার্ভারে ত্রুটি হয়েছে" },
       { status: 500 }
     );
   }
