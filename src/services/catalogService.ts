@@ -120,15 +120,15 @@ export const catalogService = {
         if (options.restaurantId) {
           query = query.eq("restaurant_id", options.restaurantId);
         }
-        if (options.isPopular !== undefined) {
-          query = query.eq("is_popular", options.isPopular);
-        }
         if (options.isRecommended !== undefined) {
           query = query.eq("is_recommended", options.isRecommended);
         }
         if (options.isCake !== undefined) {
           query = query.eq("is_cake", options.isCake);
         }
+
+        // Query database with is_popular ordering
+        query = query.order("is_popular", { ascending: false });
 
         const { data, error } = await query;
         if (!error && data) {
@@ -149,12 +149,19 @@ export const catalogService = {
             isAvailable: p.is_available,
             isPopular: p.is_popular,
             isRecommended: p.is_recommended,
+            salesCount: p.sales_count ? Number(p.sales_count) : 0,
             isCake: p.is_cake,
             prepTimeMinutes: 25,
             minAdvanceDays: p.cake_advance_days || 2,
             cakeSizes: p.cake_sizes || undefined,
             cakeFlavors: p.cake_flavors || undefined,
           }));
+
+          // If filtering specifically for Hot Selling / Popular:
+          // Include items marked is_popular by Admin OR items with sales_count > 0
+          if (options.isPopular) {
+            list = list.filter((f) => f.isPopular || (f.salesCount && f.salesCount > 0));
+          }
 
           if (options.searchQuery && options.searchQuery.trim()) {
             const q = options.searchQuery.toLowerCase().trim();
@@ -178,8 +185,20 @@ export const catalogService = {
                 list.sort((a, b) => b.price - a.price);
                 break;
               default:
+                list.sort((a, b) => {
+                  if (a.isPopular && !b.isPopular) return -1;
+                  if (!a.isPopular && b.isPopular) return 1;
+                  return (b.salesCount || 0) - (a.salesCount || 0);
+                });
                 break;
             }
+          } else {
+            // Default Priority: Admin manual Hot Selling (isPopular) first, then Highest salesCount descending
+            list.sort((a, b) => {
+              if (a.isPopular && !b.isPopular) return -1;
+              if (!a.isPopular && b.isPopular) return 1;
+              return (b.salesCount || 0) - (a.salesCount || 0);
+            });
           }
           return list;
         }
@@ -230,8 +249,19 @@ export const catalogService = {
           list.sort((a, b) => b.price - a.price);
           break;
         default:
+          list.sort((a, b) => {
+            if (a.isPopular && !b.isPopular) return -1;
+            if (!a.isPopular && b.isPopular) return 1;
+            return (b.salesCount || 0) - (a.salesCount || 0);
+          });
           break;
       }
+    } else {
+      list.sort((a, b) => {
+        if (a.isPopular && !b.isPopular) return -1;
+        if (!a.isPopular && b.isPopular) return 1;
+        return (b.salesCount || 0) - (a.salesCount || 0);
+      });
     }
     return list;
   },

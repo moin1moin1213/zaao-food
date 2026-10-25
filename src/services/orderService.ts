@@ -172,6 +172,20 @@ export const orderService = {
 
         if (error) {
           console.warn("Supabase order insert warning:", error);
+        } else {
+          // Increment sales count for each product in this order
+          for (const item of newOrder.items) {
+            if (item.productId) {
+              try {
+                await supabase.rpc("increment_sales_count", {
+                  prod_id: item.productId,
+                  qty: item.quantity || 1,
+                });
+              } catch (rpcErr) {
+                // Silently ignore if rpc not created yet
+              }
+            }
+          }
         }
       } catch (err) {
         console.warn("Supabase order insert failed, saved locally:", err);

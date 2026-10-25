@@ -71,7 +71,7 @@ function FoodsContent() {
             onChange={(e) => setSortBy(e.target.value)}
             className="px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#FF6B1A]"
           >
-            <option value="relevance">{lang === "bn" ? "প্রাসঙ্গিকতা" : "Relevance"}</option>
+            <option value="relevance">{lang === "bn" ? "হট সেলিং ও জনপ্রিয়" : "Hot Selling & Popular"}</option>
             <option value="price_asc">{t.search.priceLowToHigh}</option>
             <option value="price_desc">{t.search.priceHighToLow}</option>
           </select>

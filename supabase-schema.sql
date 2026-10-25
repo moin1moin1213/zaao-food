@@ -69,7 +69,8 @@ CREATE TABLE public.products (
     original_price NUMERIC(10,2),
     image_url TEXT NOT NULL,
     is_available BOOLEAN DEFAULT true,
-    is_popular BOOLEAN DEFAULT false,
+    is_popular BOOLEAN DEFAULT false, -- Admin manual Hot Selling toggle (always floats to top)
+    sales_count INTEGER DEFAULT 0,    -- Auto incremented when customers buy this item
     is_recommended BOOLEAN DEFAULT false,
     is_cake BOOLEAN DEFAULT false,
     cake_advance_days INTEGER DEFAULT 2,
@@ -192,8 +193,19 @@ CREATE POLICY "Customers can view their orders" ON public.orders FOR SELECT USIN
 -- 12. Indexes for High-Performance Queries
 CREATE INDEX idx_products_restaurant ON public.products(restaurant_id);
 CREATE INDEX idx_products_category ON public.products(category_id);
+CREATE INDEX idx_products_hot_selling ON public.products(is_popular DESC, sales_count DESC);
 CREATE INDEX idx_orders_customer_phone ON public.orders(customer_phone);
 CREATE INDEX idx_orders_created_at ON public.orders(created_at DESC);
+
+-- 13. Function to automatically increment product sales count on completed orders
+CREATE OR REPLACE FUNCTION public.increment_sales_count(prod_id TEXT, qty INTEGER DEFAULT 1)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE public.products
+  SET sales_count = COALESCE(sales_count, 0) + qty
+  WHERE id = prod_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ====================================================================
 -- Initial Seed Catalog (Mathbaria Initial Restaurants & Categories)

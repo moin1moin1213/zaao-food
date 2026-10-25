@@ -65,6 +65,7 @@ export interface FoodItem {
   isSpicy?: boolean;
   isPopular?: boolean;
   isRecommended?: boolean;
+  salesCount?: number;
   isCake?: boolean;
   prepTimeMinutes: number;
   // Cake-specific attributes
@@ -99,6 +100,7 @@ export interface CatalogFilterOptions {
   restaurantId?: string;
   isPopular?: boolean;
   isRecommended?: boolean;
+  salesCount?: number;
   isCake?: boolean;
   searchQuery?: string;
   sortBy?: "price_asc" | "price_desc" | "rating" | "relevance";
