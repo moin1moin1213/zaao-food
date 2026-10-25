@@ -94,6 +94,16 @@ export interface CartItem {
   specialInstructions?: string;
 }
 
+export interface CatalogFilterOptions {
+  categorySlug?: string;
+  restaurantId?: string;
+  isPopular?: boolean;
+  isRecommended?: boolean;
+  isCake?: boolean;
+  searchQuery?: string;
+  sortBy?: "price_asc" | "price_desc" | "rating" | "relevance";
+}
+
 export interface PromoBanner {
   id: string;
   badgeEn?: string;
