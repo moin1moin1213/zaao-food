@@ -199,7 +199,7 @@ CREATE INDEX idx_orders_created_at ON public.orders(created_at DESC);
 -- Initial Seed Catalog (Mathbaria Initial Restaurants & Categories)
 -- ====================================================================
 
--- Seed Categories
+-- Seed Categories (Base Dining Categories)
 INSERT INTO public.categories (id, slug, name_en, name_bn, image_url, display_order)
 VALUES
   ('cat_biryani', 'biryani', 'Biryani & Polao', 'বিরিয়ানি ও পোলাও', 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80', 1),
@@ -209,16 +209,5 @@ VALUES
   ('cat_cakes', 'cakes', 'Homemade Cakes', 'হোমমেড কেক', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 5)
 ON CONFLICT (slug) DO NOTHING;
 
--- Seed Restaurants
-INSERT INTO public.restaurants (id, slug, name_en, name_bn, phone, image_url, banner_url, cuisines_en, cuisines_bn, rating, review_count, is_open, address_en, address_bn, distance_km, prep_time_minutes)
-VALUES
-  ('rest_1', 'kacchi-mahal', 'Kacchi Mahal & Biryani House', 'কাচ্চি মহল ও বিরিয়ানি হাউজ', '+880 1711-223344', 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80', ARRAY['Kacchi', 'Tehari', 'Borhani'], ARRAY['কাচ্চি', 'তেহারি', 'বোরহানি'], 4.8, 128, true, 'Main Road, Mathbaria Bazar', 'মেইন রোড, মঠবাড়িয়া বাজার', 0.6, 25),
-  ('rest_2', 'sultana-home-bake', 'Sultana''s Home Bake (Cake Specialist)', 'সুলতানাস হোম বেক (কেক স্পেশালিস্ট)', '+880 1722-334455', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=1200&q=80', ARRAY['Birthday Cakes', 'Pastry', 'Custom Fondant'], ARRAY['জন্মদিনের কেক', 'পেস্ট্রি', 'কাস্টম ফনডেন্ট'], 4.9, 94, true, 'Holding 14, Hospital Road, Mathbaria', 'হোল্ডিং ১৪, হাসপাতাল রোড, মঠবাড়িয়া', 1.4, 45)
-ON CONFLICT (slug) DO NOTHING;
-
--- Seed Products
-INSERT INTO public.products (id, slug, restaurant_id, category_id, name_en, name_bn, description_en, description_bn, price, original_price, image_url, is_available, is_popular, is_recommended, is_cake, cake_advance_days)
-VALUES
-  ('prod_1', 'shahi-mutton-kacchi', 'rest_1', 'cat_biryani', 'Special Shahi Mutton Kacchi Biryani', 'স্পেশাল শাহী খাসির কাচ্চি বিরিয়ানি', 'Aromatic basmati rice cooked with tender mutton chunks and rich spices.', 'সুগন্ধি বাসমতী চালে রান্না করা শাহী খাসির কাচ্চি বিরিয়ানি ও আলু বোখারা।', 320.00, 350.00, 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80', true, true, true, false, 0),
-  ('prod_2', 'chocolate-truffle-cake', 'rest_2', 'cat_cakes', 'Rich Belgian Chocolate Truffle Cake', 'রিচ বেলজিয়ান চকলেট ট্রাফেল কেক', 'Layers of moist chocolate sponge with rich dark chocolate ganache.', 'প্রিমিয়াম ডার্ক চকলেটের সমৃদ্ধ হোমমেড কেক। জন্মদিন ও উৎসবের সেরা পছন্দ।', 650.00, 720.00, 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', true, true, true, true, 2)
-ON CONFLICT (slug) DO NOTHING;
+-- NOTE: Restaurants and Products are intentionally kept 100% clean and empty.
+-- All real restaurants, foods, and cakes will be dynamically added via the upcoming Admin Panel!

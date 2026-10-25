@@ -139,141 +139,166 @@ export default function HomePage() {
       </section>
 
       {/* 3. Popular Foods */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-[#FF6B1A] flex items-center justify-center">
-              <Flame className="w-4 h-4" />
+      {(loading || popularFoods.length > 0) && (
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-[#FF6B1A] flex items-center justify-center">
+                <Flame className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-gray-100">
+                  {t.home.popularFoodsTitle}
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {lang === "bn" ? "মঠবাড়িয়ার গ্রাহকদের সর্বাধিক পছন্দের খাবার" : "Top ordered dishes this week"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-gray-100">
-                {t.home.popularFoodsTitle}
-              </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {lang === "bn" ? "মঠবাড়িয়ার গ্রাহকদের সর্বাধিক পছন্দের খাবার" : "Top ordered dishes this week"}
-              </p>
-            </div>
+            <Link
+              href="/foods?sort=popular"
+              className="text-xs font-bold text-[#FF6B1A] hover:underline flex items-center gap-1"
+            >
+              <span>{t.home.viewAllFoods}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <Link
-            href="/foods?sort=popular"
-            className="text-xs font-bold text-[#FF6B1A] hover:underline flex items-center gap-1"
-          >
-            <span>{t.home.viewAllFoods}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
 
-        {loading ? (
-          <LoadingSkeleton count={4} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {popularFoods.map((food) => (
-              <ProductCard key={food.id} product={food} />
-            ))}
-          </div>
-        )}
-      </section>
+          {loading ? (
+            <LoadingSkeleton count={4} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {popularFoods.map((food) => (
+                <ProductCard key={food.id} product={food} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* 4. Dedicated Homemade Cake Showcase */}
-      <section className="rounded-3xl border border-pink-100 dark:border-pink-950/40 bg-gradient-to-r from-pink-50/70 via-rose-50/40 to-orange-50/40 dark:from-pink-950/20 dark:to-gray-900/40 p-6 sm:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-pink-600 text-white shadow-xs mb-2">
-              <span>🎂 {t.cakes.badge}</span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-gray-100">
-              {t.home.cakeSectionTitle}
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 max-w-xl">
-              {t.home.cakeSectionSubtitle}
-            </p>
-          </div>
-          <Link
-            href="/cakes"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-pink-600 hover:bg-pink-700 shadow-sm transition-transform active:scale-95 shrink-0 self-start md:self-auto"
-          >
-            <span>{t.home.viewAllCakes}</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        {loading ? (
-          <LoadingSkeleton count={3} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {cakes.map((cake) => (
-              <CakeCard key={cake.id} cake={cake} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* 5. Nearby Restaurants */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-gray-100">
-              {t.home.nearbyRestaurantsTitle}
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {lang === "bn" ? "মঠবাড়িয়া শহরের বিশ্বস্ত রেস্তোরাঁ ও রান্নাঘর" : "Reputed partner kitchens in Mathbaria"}
-            </p>
-          </div>
-          <Link
-            href="/restaurants"
-            className="text-xs font-bold text-[#FF6B1A] hover:underline flex items-center gap-1"
-          >
-            <span>{t.home.viewAllRestaurants}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {loading ? (
-          <LoadingSkeleton count={3} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {restaurants.map((rest) => (
-              <RestaurantCard key={rest.id} restaurant={rest} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* 6. Recommended For You */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center">
-              <Award className="w-4 h-4" />
-            </div>
+      {(loading || cakes.length > 0) && (
+        <section className="rounded-3xl border border-pink-100 dark:border-pink-950/40 bg-gradient-to-r from-pink-50/70 via-rose-50/40 to-orange-50/40 dark:from-pink-950/20 dark:to-gray-900/40 p-6 sm:p-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-gray-100">
-                {t.home.recommendedTitle}
+              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-pink-600 text-white shadow-xs mb-2">
+                <span>🎂 {t.cakes.badge}</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-gray-100">
+                {t.home.cakeSectionTitle}
               </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {lang === "bn" ? "খাঁটি দেশি স্বাদের আকর্ষণীয় প্ল্যাটার ও মিল" : "Chef's curated Bengali meal selections"}
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 max-w-xl">
+                {t.home.cakeSectionSubtitle}
               </p>
             </div>
+            <Link
+              href="/cakes"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-pink-600 hover:bg-pink-700 shadow-sm transition-transform active:scale-95 shrink-0 self-start md:self-auto"
+            >
+              <span>{t.home.viewAllCakes}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-          <Link
-            href="/foods?sort=recommended"
-            className="text-xs font-bold text-[#FF6B1A] hover:underline flex items-center gap-1"
-          >
-            <span>{t.common.viewAll}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
 
-        {loading ? (
-          <LoadingSkeleton count={4} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {recommendedFoods.map((food) => (
-              <ProductCard key={food.id} product={food} />
-            ))}
+          {loading ? (
+            <LoadingSkeleton count={3} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {cakes.map((cake) => (
+                <CakeCard key={cake.id} cake={cake} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* 5. Nearby Restaurants */}
+      {(loading || restaurants.length > 0) && (
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-gray-100">
+                {t.home.nearbyRestaurantsTitle}
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {lang === "bn" ? "মঠবাড়িয়া শহরের বিশ্বস্ত রেস্তোরাঁ ও রান্নাঘর" : "Reputed partner kitchens in Mathbaria"}
+              </p>
+            </div>
+            <Link
+              href="/restaurants"
+              className="text-xs font-bold text-[#FF6B1A] hover:underline flex items-center gap-1"
+            >
+              <span>{t.home.viewAllRestaurants}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-        )}
-      </section>
+
+          {loading ? (
+            <LoadingSkeleton count={3} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {restaurants.map((rest) => (
+                <RestaurantCard key={rest.id} restaurant={rest} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* 6. Recommended For You */}
+      {(loading || recommendedFoods.length > 0) && (
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center">
+                <Award className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-gray-100">
+                  {t.home.recommendedTitle}
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {lang === "bn" ? "খাঁটি দেশি স্বাদের আকর্ষণীয় প্ল্যাটার ও মিল" : "Chef's curated Bengali meal selections"}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/foods?sort=recommended"
+              className="text-xs font-bold text-[#FF6B1A] hover:underline flex items-center gap-1"
+            >
+              <span>{t.common.viewAll}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {loading ? (
+            <LoadingSkeleton count={4} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {recommendedFoods.map((food) => (
+                <ProductCard key={food.id} product={food} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Empty Database State Notice (Before Admin adds any items) */}
+      {!loading && popularFoods.length === 0 && cakes.length === 0 && restaurants.length === 0 && (
+        <div className="rounded-3xl border border-dashed border-gray-200 dark:border-gray-800 p-8 sm:p-12 text-center space-y-3 bg-gray-50/50 dark:bg-gray-850/50">
+          <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-950/60 text-[#FF6B1A] flex items-center justify-center mx-auto">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <h3 className="font-extrabold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+            {lang === "bn" ? "রেস্তোরাঁ ও মেনু যুক্ত করা হচ্ছে" : "Kitchens & Menus Being Added"}
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+            {lang === "bn"
+              ? "অ্যাডমিন প্যানেল থেকে মঠবাড়িয়ার নতুন রেস্তোরাঁ ও সুস্বাদু খাবারের মেনু যুক্ত করা মাত্রই এখানে স্বয়ংক্রিয়ভাবে প্রদর্শিত হবে।"
+              : "As soon as restaurants and food items are added via the Admin Panel, they will appear right here."}
+          </p>
+        </div>
+      )}
 
       {/* 7. Value Propositions / Why PenguFood */}
       <section className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-850 p-6 sm:p-8">
