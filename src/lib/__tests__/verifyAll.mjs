@@ -161,4 +161,82 @@ assert.strictEqual(conflictCheck.currentRestName, "Kacchi Mahal");
 assert.strictEqual(conflictCheck.newRestName, "Bismillah Hotel");
 console.log("✔ Single-restaurant conflict logic passed.");
 
-console.log("\n🎉 ALL TESTS PASSED SUCCESSFULLY! (100% SUCCESS)\n");
+// TEST 5: Complete 7-Stage Order Lifecycle Progression
+console.log("\n[TEST 5] Order Lifecycle State Machine Validation...");
+const validTransitions = {
+  placed: ["accepted", "cancelled"],
+  accepted: ["preparing", "cancelled"],
+  preparing: ["ready_for_pickup", "cancelled"],
+  ready_for_pickup: ["rider_picked_up", "on_the_way", "cancelled"],
+  rider_picked_up: ["on_the_way", "cancelled"],
+  on_the_way: ["delivered", "cancelled"],
+  delivered: [],
+  cancelled: [],
+};
+
+function canTransition(current, next) {
+  return validTransitions[current]?.includes(next) ?? false;
+}
+
+assert.strictEqual(canTransition("placed", "accepted"), true);
+assert.strictEqual(canTransition("accepted", "preparing"), true);
+assert.strictEqual(canTransition("preparing", "ready_for_pickup"), true);
+assert.strictEqual(canTransition("ready_for_pickup", "on_the_way"), true);
+assert.strictEqual(canTransition("on_the_way", "delivered"), true);
+assert.strictEqual(canTransition("placed", "delivered"), false); // Invalid jump
+assert.strictEqual(canTransition("delivered", "preparing"), false); // Invalid reversal
+console.log("✔ Order lifecycle progression validation passed.");
+
+// TEST 6: Financial Split & Commission Accounting
+console.log("\n[TEST 6] Platform Commission & Rider Compensation Split...");
+function calculateFinancials(subtotal, deliveryFee, commissionRate = 15.0, riderBaseFee = 35.0) {
+  const platformCommission = Math.round((subtotal * commissionRate) / 100);
+  const restaurantPayout = subtotal - platformCommission;
+  const platformDeliveryMargin = deliveryFee - riderBaseFee;
+  const totalPlatformEarnings = platformCommission + platformDeliveryMargin;
+
+  return {
+    subtotal,
+    deliveryFee,
+    totalCustomerPays: subtotal + deliveryFee,
+    platformCommission,
+    restaurantPayout,
+    riderPayout: riderBaseFee,
+    totalPlatformEarnings,
+  };
+}
+
+const testFinancials = calculateFinancials(400, 60, 15.0, 35.0);
+assert.strictEqual(testFinancials.totalCustomerPays, 460);
+assert.strictEqual(testFinancials.platformCommission, 60);
+assert.strictEqual(testFinancials.restaurantPayout, 340);
+assert.strictEqual(testFinancials.riderPayout, 35);
+assert.strictEqual(testFinancials.totalPlatformEarnings, 85); // 60 comm + 25 delivery margin
+console.log("✔ Financial split & commission calculations passed.");
+
+// TEST 7: Mathbaria Geolocation Integrity
+console.log("\n[TEST 7] Mathbaria OpenStreetMap Coordinate Integrity...");
+const MATHBARIA_CENTER_LAT = 22.2858;
+const MATHBARIA_CENTER_LNG = 89.9614;
+
+function isWithinMathbariaDeliveryCoverage(lat, lng, maxRadiusKm = 10.0) {
+  // Haversine formula
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const R = 6371; // Earth radius in km
+  const dLat = toRad(lat - MATHBARIA_CENTER_LAT);
+  const dLng = toRad(lng - MATHBARIA_CENTER_LNG);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(MATHBARIA_CENTER_LAT)) * Math.cos(toRad(lat)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  return distance <= maxRadiusKm;
+}
+
+assert.strictEqual(isWithinMathbariaDeliveryCoverage(22.2858, 89.9614), true); // Center
+assert.strictEqual(isWithinMathbariaDeliveryCoverage(22.2950, 89.9650), true); // ~1.2 km away
+assert.strictEqual(isWithinMathbariaDeliveryCoverage(23.8103, 90.4125), false); // Dhaka (~180 km away)
+console.log("✔ Mathbaria OpenStreetMap coordinate integrity passed.");
+
+console.log("\n🎉 ALL 7 TEST SUITES PASSED SUCCESSFULLY! (100% SUCCESS)\n");

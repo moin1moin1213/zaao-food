@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "PenguFood Rider",
+    "slug": "pengufood-rider",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FF6B1A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pengufood.rider"
+    },
+    "android": {
+      "package": "com.pengufood.rider",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF6B1A"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    }
+  }
+}

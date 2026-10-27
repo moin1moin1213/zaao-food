@@ -17,6 +17,8 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { orderService } from "@/services/orderService";
 import { Order, OrderStatus } from "@/services/types";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { LiveOrderTrackerMap } from "@/components/map/LiveOrderTrackerMap";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 
 interface OrderTrackingProps {
   params: Promise<{ orderId: string }>;
@@ -46,9 +48,33 @@ export default function OrderTrackingPage({ params }: OrderTrackingProps) {
   useEffect(() => {
     loadOrder();
 
-    // Polling boundary interface (prepared for Supabase Realtime subscription)
-    const interval = setInterval(loadOrder, 15000);
-    return () => clearInterval(interval);
+    // Supabase Realtime live sync
+    if (supabase && isSupabaseConfigured) {
+      const channel = supabase
+        .channel(`order_tracking_${orderId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "orders",
+            filter: `id=eq.${orderId}`,
+          },
+          (payload: any) => {
+            if (payload.new) {
+              loadOrder();
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        if (supabase) supabase.removeChannel(channel);
+      };
+    } else {
+      const interval = setInterval(loadOrder, 10000);
+      return () => clearInterval(interval);
+    }
   }, [orderId]);
 
 
@@ -135,7 +161,7 @@ export default function OrderTrackingPage({ params }: OrderTrackingProps) {
             <OrderTimeline currentStatus={order.status} />
           </div>
 
-          {/* Leaflet & OpenStreetMap Live Route Map Boundary */}
+          {/* Leaflet & OpenStreetMap Live Route Map */}
           <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 p-6 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-extrabold text-sm text-gray-900 dark:text-gray-100">
@@ -144,38 +170,10 @@ export default function OrderTrackingPage({ params }: OrderTrackingProps) {
               <span className="text-[11px] font-bold text-gray-400">Mathbaria Bazar Hub</span>
             </div>
 
-            <div className="relative w-full h-52 sm:h-64 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-dashed border-gray-300 dark:border-gray-700 overflow-hidden flex flex-col items-center justify-center text-center p-4">
-              <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#FF6B1A_1px,transparent_1px)] [background-size:16px_16px]" />
+            <LiveOrderTrackerMap order={order} className="w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-inner" />
 
-              <div className="relative z-10 flex items-center justify-center gap-6">
-                <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-md">
-                    <Store className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 mt-1">
-                    {lang === "bn" ? "রেস্তোরাঁ" : "Kitchen"}
-                  </span>
-                </div>
-
-                <div className="w-20 sm:w-32 h-0.5 bg-dashed border-t-2 border-[#FF6B1A] relative">
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-[#FF6B1A] text-white flex items-center justify-center text-[10px]">
-                    <Bike className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 mt-1">
-                    {lang === "bn" ? "আপনার ঠিকানা" : "Destination"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="relative z-10 text-xs text-gray-500 dark:text-gray-400 mt-5 max-w-sm">
-                {t.tracking.mapTrackingNotice}
-              </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              {t.tracking.mapTrackingNotice}
             </div>
           </div>
         </div>

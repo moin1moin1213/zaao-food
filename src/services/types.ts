@@ -30,6 +30,12 @@ export interface Restaurant {
   addressBn: string;
   distanceKm: number;
   prepTimeMinutes: number;
+  commissionRate?: number;
+  phone?: string;
+  ownerPhone?: string;
+  latitude?: number;
+  longitude?: number;
+  totalSales?: number;
 }
 
 export interface CakeSizeOption {
@@ -192,8 +198,60 @@ export interface Order {
   paymentMethod: 'cod' | 'online';
   paymentStatus: 'pending' | 'paid';
   rider?: OrderRider;
+  riderId?: string;
+  riderFee?: number;
+  commissionAmount?: number;
+  statusHistory?: Array<{ status: OrderStatus; timestamp: string; note?: string }>;
   estimatedDeliveryMinutes?: number;
   cancellationReason?: string;
+}
+
+export interface RiderProfile {
+  id: string;
+  name: string;
+  phone: string;
+  vehicle: string;
+  licensePlate?: string;
+  isActive: boolean;
+  isOnline: boolean;
+  currentLat?: number;
+  currentLng?: number;
+  totalDeliveries: number;
+  totalEarnings: number;
+  balance: number;
+  rating: number;
+}
+
+export interface DeliveryZone {
+  id: string;
+  nameEn: string;
+  nameBn: string;
+  minDistanceKm: number;
+  maxDistanceKm: number;
+  regularFee: number;
+  cakeFee: number;
+  isActive: boolean;
+}
+
+export interface Coupon {
+  code: string;
+  descriptionEn?: string;
+  descriptionBn?: string;
+  discountType: 'fixed' | 'percentage';
+  discountValue: number;
+  minOrder: number;
+  maxDiscount?: number;
+  isActive: boolean;
+  validUntil?: string;
+}
+
+export interface AdminStats {
+  todayOrdersCount: number;
+  todayRevenue: number;
+  activeRestaurantsCount: number;
+  onlineRidersCount: number;
+  totalCommissionEarned: number;
+  totalRiderPayouts: number;
 }
 
 export interface NotificationItem {
