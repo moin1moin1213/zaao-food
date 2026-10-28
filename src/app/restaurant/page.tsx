@@ -20,11 +20,12 @@ import {
 import { restaurantService } from "@/services/restaurantService";
 import { Order, OrderStatus } from "@/services/types";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { safeLocalStorageGet } from "@/lib/storage/safeStorage";
+import { useRestaurant } from "./RestaurantContext";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 
 export default function RestaurantOrdersPage() {
   const { lang, formatPrice, formatNum } = useLanguage();
+  const { currentRestaurantId } = useRestaurant();
   const [orders, setOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState<"incoming" | "kitchen" | "ready" | "history">("incoming");
   const [loading, setLoading] = useState(true);
@@ -56,12 +57,10 @@ export default function RestaurantOrdersPage() {
     }
   };
 
-  const activeRestId = safeLocalStorageGet<string>("active_restaurant_id", "");
-
   async function loadOrders() {
-    if (!activeRestId) return;
+    if (!currentRestaurantId) return;
     try {
-      const data = await restaurantService.getOrders(activeRestId);
+      const data = await restaurantService.getOrders(currentRestaurantId);
       setOrders(data);
     } catch (err) {
       console.error("Failed to load restaurant orders:", err);
@@ -73,16 +72,16 @@ export default function RestaurantOrdersPage() {
   useEffect(() => {
     loadOrders();
 
-    if (supabase && isSupabaseConfigured) {
+    if (supabase && isSupabaseConfigured && currentRestaurantId) {
       const channel = supabase
-        .channel(`restaurant_orders_${activeRestId}`)
+        .channel(`restaurant_orders_${currentRestaurantId}`)
         .on(
           "postgres_changes",
           {
             event: "*",
             schema: "public",
             table: "orders",
-            filter: activeRestId ? `restaurant_id=eq.${activeRestId}` : undefined,
+            filter: `restaurant_id=eq.${currentRestaurantId}`,
           },
           (payload: any) => {
             if (payload.eventType === "INSERT") {
@@ -100,7 +99,7 @@ export default function RestaurantOrdersPage() {
       const interval = setInterval(loadOrders, 10000);
       return () => clearInterval(interval);
     }
-  }, [activeRestId]);
+  }, [currentRestaurantId]);
 
   const handleAccept = async (orderId: string) => {
     await restaurantService.acceptOrder(orderId, selectedPrepTime);

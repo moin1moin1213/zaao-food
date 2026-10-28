@@ -17,18 +17,17 @@ import { restaurantService } from "@/services/restaurantService";
 import { catalogService } from "@/services/catalogService";
 import { FoodItem, Category } from "@/services/types";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { safeLocalStorageGet } from "@/lib/storage/safeStorage";
+import { useRestaurant } from "../RestaurantContext";
 
 export default function RestaurantMenuPage() {
   const { lang, formatPrice } = useLanguage();
+  const { currentRestaurantId } = useRestaurant();
   const [menu, setMenu] = useState<FoodItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const activeRestId = safeLocalStorageGet<string>("active_restaurant_id", "");
 
   const [newItem, setNewItem] = useState<Partial<FoodItem>>({
     nameEn: "",
@@ -43,10 +42,10 @@ export default function RestaurantMenuPage() {
   });
 
   async function loadMenu() {
-    if (!activeRestId) return;
+    if (!currentRestaurantId) return;
     try {
       const [items, cats] = await Promise.all([
-        restaurantService.getMenu(activeRestId),
+        restaurantService.getMenu(currentRestaurantId),
         catalogService.getCategories(),
       ]);
       setMenu(items);
@@ -60,7 +59,7 @@ export default function RestaurantMenuPage() {
 
   useEffect(() => {
     loadMenu();
-  }, [activeRestId]);
+  }, [currentRestaurantId]);
 
   const handleToggleStock = async (item: FoodItem) => {
     const nextStock = !item.isAvailable;
@@ -72,12 +71,12 @@ export default function RestaurantMenuPage() {
 
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeRestId) return;
+    if (!currentRestaurantId) return;
     setSaving(true);
     try {
       await restaurantService.saveProduct({
         ...newItem,
-        restaurantId: activeRestId,
+        restaurantId: currentRestaurantId,
         categoryId: newItem.categoryId || "cat_biryani",
       });
       setIsAddModalOpen(false);

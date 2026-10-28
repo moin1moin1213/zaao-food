@@ -1,4 +1,5 @@
-import { DeliveryFeeCalculation, DeliveryZoneType } from "@/services/types";
+import { DeliveryFeeCalculation, DeliveryZoneType, DeliveryZone } from "@/services/types";
+import { safeLocalStorageGet } from "@/lib/storage/safeStorage";
 
 // Mathbaria Bazar central coordinates (Configurable via environment or default)
 export const MATHBARIA_CENTER = {
@@ -73,9 +74,38 @@ export function calculateDeliveryFee(
     distanceKm = 0;
   }
 
+  // Load dynamically configured rates from Admin Dashboard if available
+  let rate0_2 = 40;
+  let rate2_3 = 60;
+  let cakeRate0_3 = 100;
+  let cakeRate3_8 = 150;
+
+  if (typeof window !== "undefined") {
+    try {
+      const dynamicZones = safeLocalStorageGet<DeliveryZone[]>("admin_delivery_zones", []);
+      if (dynamicZones && dynamicZones.length > 0) {
+        const z1 = dynamicZones.find((z) => z.id === "zone_0_2");
+        const z2 = dynamicZones.find((z) => z.id === "zone_2_3");
+        const z3 = dynamicZones.find((z) => z.id === "zone_3_8");
+        if (z1) {
+          rate0_2 = z1.regularFee;
+          cakeRate0_3 = z1.cakeFee;
+        }
+        if (z2) {
+          rate2_3 = z2.regularFee;
+        }
+        if (z3) {
+          cakeRate3_8 = z3.cakeFee;
+        }
+      }
+    } catch (e) {
+      // fallback to defaults
+    }
+  }
+
   // Case 1: Regular Zone 0 to 2 km
   if (distanceKm <= 2.0) {
-    const fee = isCakeOrder ? 100 : 40;
+    const fee = isCakeOrder ? cakeRate0_3 : rate0_2;
     return {
       zone: 'regular_0_2',
       distanceKm,
@@ -84,17 +114,17 @@ export function calculateDeliveryFee(
       isEligibleForCake: true,
       advanceDaysRequired: isCakeOrder ? 2 : 0,
       messageEn: isCakeOrder
-        ? "Regular delivery zone (0–2 km). Homemade cake delivery fee: ৳100."
-        : "Regular delivery zone (0–2 km). Standard delivery fee: ৳40.",
+        ? `Regular delivery zone (0–2 km). Homemade cake delivery fee: ৳${fee}.`
+        : `Regular delivery zone (0–2 km). Standard delivery fee: ৳${fee}.`,
       messageBn: isCakeOrder
-        ? "রেগুলার ডেলিভারি জোন (০–২ কিমি)। হোমমেড কেক ডেলিভারি ফি: ৳১০০।"
-        : "রেগুলার ডেলিভারি জোন (০–২ কিমি)। সাধারণ ডেলিভারি ফি: ৳৪০।",
+        ? `রেগুলার ডেলিভারি জোন (০–২ কিমি)। হোমমেড কেক ডেলিভারি ফি: ৳${fee}।`
+        : `রেগুলার ডেলিভারি জোন (০–২ কিমি)। সাধারণ ডেলিভারি ফি: ৳${fee}।`,
     };
   }
 
   // Case 2: Regular Zone > 2 km to 3 km
   if (distanceKm <= 3.0) {
-    const fee = isCakeOrder ? 100 : 60;
+    const fee = isCakeOrder ? cakeRate0_3 : rate2_3;
     return {
       zone: 'regular_2_3',
       distanceKm,
@@ -103,11 +133,11 @@ export function calculateDeliveryFee(
       isEligibleForCake: true,
       advanceDaysRequired: isCakeOrder ? 2 : 0,
       messageEn: isCakeOrder
-        ? "Regular delivery zone (2–3 km). Homemade cake delivery fee: ৳100."
-        : "Regular delivery zone (2–3 km). Standard delivery fee: ৳60.",
+        ? `Regular delivery zone (2–3 km). Homemade cake delivery fee: ৳${fee}.`
+        : `Regular delivery zone (2–3 km). Standard delivery fee: ৳${fee}.`,
       messageBn: isCakeOrder
-        ? "রেগুলার ডেলিভারি জোন (২–৩ কিমি)। হোমমেড কেক ডেলিভারি ফি: ৳১০০।"
-        : "রেগুলার ডেলিভারি জোন (২–৩ কিমি)। সাধারণ ডেলিভারি ফি: ৳৬০।",
+        ? `রেগুলার ডেলিভারি জোন (২–৩ কিমি)। হোমমেড কেক ডেলিভারি ফি: ৳${fee}।`
+        : `রেগুলার ডেলিভারি জোন (২–৩ কিমি)। সাধারণ ডেলিভারি ফি: ৳${fee}।`,
     };
   }
 
@@ -117,18 +147,18 @@ export function calculateDeliveryFee(
       return {
         zone: 'special_cake_3_8',
         distanceKm,
-        fee: 150,
+        fee: cakeRate3_8,
         isEligibleForFood: false,
         isEligibleForCake: true,
         advanceDaysRequired: 2,
-        messageEn: "Special Cake Zone (3–8 km). Advance booking required (2–3 days). Delivery fee: ৳150.",
-        messageBn: "বিশেষ কেক জোন (৩–৮ কিমি)। অগ্রিম বুকিং আবশ্যক (২–৩ দিন)। ডেলিভারি ফি: ৳১৫০।",
+        messageEn: `Special Cake Zone (3–8 km). Advance booking required (2–3 days). Delivery fee: ৳${cakeRate3_8}.`,
+        messageBn: `বিশেষ কেক জোন (৩–৮ কিমি)। অগ্রিম বুকিং আবশ্যক (২–৩ দিন)। ডেলিভারি ফি: ৳${cakeRate3_8}।`,
       };
     } else {
       return {
         zone: 'special_cake_3_8',
         distanceKm,
-        fee: 150,
+        fee: cakeRate3_8,
         isEligibleForFood: false,
         isEligibleForCake: true,
         advanceDaysRequired: 2,

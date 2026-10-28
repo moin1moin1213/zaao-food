@@ -188,7 +188,6 @@ export const adminService = {
         };
 
         if (riderData) {
-          updatePayload.rider_id = riderData.id;
           updatePayload.rider_name = riderData.name;
           updatePayload.rider_phone = riderData.phone;
           updatePayload.rider_vehicle = riderData.vehicle;
@@ -380,12 +379,9 @@ export const adminService = {
           name: rider.name,
           phone: rider.phone,
           vehicle: rider.vehicle || "Motorbike",
-          license_plate: rider.licensePlate,
           is_active: rider.isActive ?? true,
-          is_online: rider.isOnline ?? false,
           current_lat: rider.currentLat || 22.2858,
           current_lng: rider.currentLng || 89.9614,
-          updated_at: new Date().toISOString(),
         };
 
         const { error } = await supabase.from("riders").upsert(payload);

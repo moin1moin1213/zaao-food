@@ -16,7 +16,7 @@ export const catalogService = {
           .select("*")
           .order("display_order", { ascending: true });
 
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           return data.map((c) => ({
             id: c.id,
             slug: c.slug,
@@ -28,7 +28,6 @@ export const catalogService = {
             isCakeCategory: c.slug === "cakes",
           }));
         }
-        return [];
       } catch (err) {
         console.warn("Supabase categories query error, using local fallback:", err);
       }
@@ -49,12 +48,13 @@ export const catalogService = {
           .select("*")
           .order("rating", { ascending: false });
 
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           let results: Restaurant[] = data.map((r) => ({
             id: r.id,
             slug: r.slug,
             nameEn: r.name_en,
             nameBn: r.name_bn,
+            phone: r.phone,
             image: r.image_url,
             banner: r.banner_url,
             cuisinesEn: r.cuisines_en || [],
@@ -83,7 +83,6 @@ export const catalogService = {
           }
           return results;
         }
-        return [];
       } catch (err) {
         console.warn("Supabase restaurants query error, using local fallback:", err);
       }
@@ -131,7 +130,7 @@ export const catalogService = {
         query = query.order("is_popular", { ascending: false });
 
         const { data, error } = await query;
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           let list: FoodItem[] = data.map((p) => ({
             id: p.id,
             slug: p.slug,
@@ -202,7 +201,19 @@ export const catalogService = {
           }
           return list;
         }
-        return [];
+
+        const hasFilter = Boolean(
+          options.categorySlug ||
+          options.restaurantId ||
+          options.searchQuery ||
+          options.isPopular !== undefined ||
+          options.isRecommended !== undefined ||
+          options.isCake !== undefined
+        );
+
+        if (!error && data && data.length === 0 && hasFilter) {
+          return [];
+        }
       } catch (err) {
         console.warn("Supabase products query error, using local fallback:", err);
       }

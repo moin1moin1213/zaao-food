@@ -44,6 +44,12 @@ export function LiveOrderTrackerMap({ order, className }: LiveOrderTrackerMapPro
     if (!order.riderId && !order.rider) return;
 
     if (supabase && isSupabaseConfigured) {
+      const riderFilter = order.riderId
+        ? `id=eq.${order.riderId}`
+        : order.rider?.phone
+        ? `phone=eq.${order.rider.phone}`
+        : undefined;
+
       const channel = supabase
         .channel(`order_live_rider_${order.id}`)
         .on(
@@ -52,7 +58,7 @@ export function LiveOrderTrackerMap({ order, className }: LiveOrderTrackerMapPro
             event: "UPDATE",
             schema: "public",
             table: "riders",
-            filter: order.riderId ? `id=eq.${order.riderId}` : undefined,
+            filter: riderFilter,
           },
           (payload: any) => {
             const updated = payload.new;
@@ -70,7 +76,7 @@ export function LiveOrderTrackerMap({ order, className }: LiveOrderTrackerMapPro
         if (supabase) supabase.removeChannel(channel);
       };
     }
-  }, [order.id, order.riderId]);
+  }, [order.id, order.riderId, order.rider?.phone]);
 
   // Construct markers array
   const markers: Array<{

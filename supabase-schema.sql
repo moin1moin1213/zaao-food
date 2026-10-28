@@ -6,7 +6,7 @@
 -- 1. Enable Required Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Drop conflicting tables if re-initializing cleanly
+-- 2. Clean Drop of Previous / Conflicting Tables (Optional: uncomment if resetting completely)
 -- DROP TABLE IF EXISTS public.rider_payouts CASCADE;
 -- DROP TABLE IF EXISTS public.restaurant_payouts CASCADE;
 -- DROP TABLE IF EXISTS public.coupons CASCADE;
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS public.restaurants (
     longitude NUMERIC(9,6) DEFAULT 89.9614,
     distance_km NUMERIC(3,1) DEFAULT 1.0,
     prep_time_minutes INTEGER DEFAULT 25,
-    commission_rate NUMERIC(4,1) DEFAULT 15.0, -- Platform commission percentage (e.g. 15%)
+    commission_rate NUMERIC(4,1) DEFAULT 15.0,
     total_sales NUMERIC(12,2) DEFAULT 0.00,
     balance NUMERIC(12,2) DEFAULT 0.00,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -111,11 +111,10 @@ CREATE TABLE IF NOT EXISTS public.riders (
 
 -- 7. Orders Table (Shared lifecycle across Customer, Restaurant, Rider, Admin)
 CREATE TABLE IF NOT EXISTS public.orders (
-    id TEXT PRIMARY KEY, -- e.g. 'PF-84920'
+    id TEXT PRIMARY KEY,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     status TEXT NOT NULL DEFAULT 'placed', 
-    -- Progression: 'placed' -> 'accepted' -> 'preparing' -> 'ready_for_pickup' -> 'rider_picked_up' -> 'on_the_way' -> 'delivered' | 'cancelled'
-    restaurant_id TEXT NOT NULL REFERENCES public.restaurants(id),
+    restaurant_id TEXT NOT NULL REFERENCES public.restaurants(id) ON DELETE CASCADE,
     restaurant_name_en TEXT NOT NULL,
     restaurant_name_bn TEXT NOT NULL,
     restaurant_phone TEXT,
@@ -131,8 +130,8 @@ CREATE TABLE IF NOT EXISTS public.orders (
     delivery_fee NUMERIC(10,2) NOT NULL,
     discount NUMERIC(10,2) DEFAULT 0.00,
     total NUMERIC(10,2) NOT NULL,
-    payment_method TEXT NOT NULL DEFAULT 'cod', -- 'cod' | 'online'
-    payment_status TEXT NOT NULL DEFAULT 'pending', -- 'pending' | 'paid'
+    payment_method TEXT NOT NULL DEFAULT 'cod',
+    payment_status TEXT NOT NULL DEFAULT 'pending',
     rider_id TEXT REFERENCES public.riders(id),
     rider_name TEXT,
     rider_phone TEXT,
@@ -163,7 +162,7 @@ CREATE TABLE IF NOT EXISTS public.coupons (
     code TEXT PRIMARY KEY,
     description_en TEXT,
     description_bn TEXT,
-    discount_type TEXT NOT NULL DEFAULT 'fixed', -- 'fixed' or 'percentage'
+    discount_type TEXT NOT NULL DEFAULT 'fixed',
     discount_value NUMERIC(10,2) NOT NULL,
     min_order NUMERIC(10,2) DEFAULT 0.00,
     max_discount NUMERIC(10,2),
@@ -202,7 +201,46 @@ CREATE TABLE IF NOT EXISTS public.app_settings (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Default Delivery Zones for Mathbaria
+-- ====================================================================
+-- Initial Seed Catalog & Mathbaria Operational Data
+-- ====================================================================
+
+-- Seed Categories
+INSERT INTO public.categories (id, slug, name_en, name_bn, image_url, display_order)
+VALUES
+  ('cat_biryani', 'biryani', 'Biryani & Polao', 'বিরিয়ানি ও পোলাও', 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80', 1),
+  ('cat_rice', 'rice-meals', 'Rice & Curries', 'ভাত ও তরকারি', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80', 2),
+  ('cat_fastfood', 'fast-food', 'Burgers & Fast Food', 'বার্গার ও ফাস্টফুড', 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80', 3),
+  ('cat_snacks', 'snacks', 'Evening Snacks', 'সান্ধ্যকালীন নাশতা', 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80', 4),
+  ('cat_cakes', 'cakes', 'Homemade Cakes', 'হোমমেড কেক', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 5)
+ON CONFLICT (slug) DO NOTHING;
+
+-- Seed Restaurants (Mathbaria Initial Restaurants)
+INSERT INTO public.restaurants (id, slug, name_en, name_bn, phone, owner_phone, image_url, banner_url, cuisines_en, cuisines_bn, rating, review_count, is_open, opening_hours_en, opening_hours_bn, min_order, address_en, address_bn, distance_km, prep_time_minutes, commission_rate)
+VALUES
+  ('rest-1', 'kacchi-mahal', 'Kacchi Mahal & Biryani House', 'কাচ্চি মহল ও বিরিয়ানি হাউজ', '01711223344', '01711223344', 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80', ARRAY['Biryani', 'Kacchi', 'Bengali'], ARRAY['বিরিয়ানি', 'কাচ্চি', 'বাঙালি'], 4.8, 142, true, '11:00 AM - 10:30 PM', 'সকাল ১১:০০ - রাত ১০:৩০', 150.00, 'Main Road, Mathbaria Bazar, Mathbaria', 'মেইন রোড, মঠবাড়িয়া বাজার, মঠবাড়িয়া', 0.4, 25, 15.0),
+  ('rest-2', 'bismillah-hotel', 'Bismillah Hotel & Restaurant', 'বিসমিল্লাহ হোটেল অ্যান্ড রেস্টুরেন্ট', '01819876543', '01819876543', 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80', ARRAY['Bengali Meals', 'Fish Curry', 'Khichuri'], ARRAY['বাঙালি খাবার', 'মাছের তরকারি', 'খিচুড়ি'], 4.6, 98, true, '07:00 AM - 10:00 PM', 'সকাল ০৭:০০ - রাত ১০:০০', 100.00, 'College Road, Near Govt. Degree College, Mathbaria', 'কলেজ রোড, সরকারি ডিগ্রি কলেজের কাছে, মঠবাড়িয়া', 1.1, 20, 15.0),
+  ('rest-3', 'mathbaria-fast-food', 'Mathbaria Cafe & Fast Food', 'মঠবাড়িয়া ক্যাফে অ্যান্ড ফাস্ট ফুড', '01912340987', '01912340987', 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=1200&q=80', ARRAY['Burgers', 'Fried Chicken', 'Pizza'], ARRAY['বার্গার', 'ফ্রাইড চিকেন', 'পিজ্জা'], 4.5, 76, true, '12:00 PM - 11:00 PM', 'দুপুর ১২:০০ - রাত ১১:০০', 120.00, 'Hospital Road, Ward 3, Mathbaria', 'হাসপাতাল রোড, ৩ নং ওয়ার্ড, মঠবাড়িয়া', 1.5, 30, 15.0),
+  ('rest-4', 'annapurna-mistanna', 'Annapurna Sweets & Snacks', 'অন্নপূর্ণা মিষ্টান্ন ও নাশতা', '01722334455', '01722334455', 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80', ARRAY['Sweets', 'Snacks', 'Singara', 'Tea'], ARRAY['মিষ্টি', 'নাশতা', 'সিঙ্গারা', 'চা'], 4.7, 115, true, '06:30 AM - 09:30 PM', 'সকাল ০৬:৩০ - রাত ০৯:৩০', 80.00, 'Launch Ghat Road, Mathbaria Bazar', 'লঞ্চঘাট রোড, মঠবাড়িয়া বাজার', 0.6, 15, 12.0),
+  ('rest-5', 'mom-bakes', 'Mom Bakes Mathbaria', 'মাম বেকস মঠবাড়িয়া', '01633445566', '01633445566', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=1200&q=80', ARRAY['Cakes', 'Pastries', 'Desserts'], ARRAY['কেক', 'পেস্ট্রি', 'মিষ্টান্ন'], 4.9, 89, true, '09:00 AM - 09:00 PM', 'সকাল ০৯:০০ - রাত ০৯:০০', 300.00, 'Thana Road, Ward 2, Mathbaria', 'থানা রোড, ২ নং ওয়ার্ড, মঠবাড়িয়া', 0.8, 45, 10.0)
+ON CONFLICT (id) DO UPDATE SET
+  name_en = EXCLUDED.name_en,
+  name_bn = EXCLUDED.name_bn,
+  phone = EXCLUDED.phone,
+  is_open = EXCLUDED.is_open;
+
+-- Seed Riders (Mathbaria Initial Fleet)
+INSERT INTO public.riders (id, name, phone, vehicle, is_active, is_online, current_lat, current_lng, total_deliveries, total_earnings, balance, rating)
+VALUES
+  ('rdr_1', 'Tariqul Islam', '01711223344', 'Honda 125 (Barishal-Ha-1234)', true, true, 22.2858, 89.9614, 42, 1470.00, 520.00, 4.9),
+  ('rdr_2', 'Shafiqur Rahman', '01819876543', 'Discover 110 (Barishal-Ha-5678)', true, true, 22.2842, 89.9602, 28, 980.00, 350.00, 4.8),
+  ('rdr_3', 'Mehedi Hasan', '01912340987', 'Runner Bike', true, false, 22.2850, 89.9610, 15, 525.00, 175.00, 4.7)
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  phone = EXCLUDED.phone,
+  vehicle = EXCLUDED.vehicle;
+
+-- Seed Delivery Zones
 INSERT INTO public.delivery_zones (id, name_en, name_bn, min_distance_km, max_distance_km, regular_fee, cake_fee, is_active)
 VALUES
   ('zone_0_2', 'Mathbaria Town Core (0-2 km)', 'মঠবাড়িয়া পৌর এলাকা (০-২ কিমি)', 0.0, 2.0, 40.00, 100.00, true),
@@ -220,27 +258,38 @@ VALUES
   ('rider_commission', '{"base_delivery_fee_cut": 35, "surge_bonus": 0}'::jsonb, 'Rider payment rules per order')
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
--- Default Welcome Coupon
+-- Default Welcome Coupons
 INSERT INTO public.coupons (code, description_en, description_bn, discount_type, discount_value, min_order, is_active)
 VALUES
   ('PENGU50', 'Get 50 BDT off on your first order', 'প্রথম অর্ডারে ৫০ টাকা ছাড়', 'fixed', 50.00, 250.00, true),
   ('MATHBARIA', '10% discount on local orders', '১০% স্পেশাল ডিসকাউন্ট', 'percentage', 10.00, 200.00, true)
 ON CONFLICT (code) DO NOTHING;
 
--- Seed Categories
-INSERT INTO public.categories (id, slug, name_en, name_bn, image_url, display_order)
-VALUES
-  ('cat_biryani', 'biryani', 'Biryani & Polao', 'বিরিয়ানি ও পোলাও', 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80', 1),
-  ('cat_rice', 'rice-meals', 'Rice & Curries', 'ভাত ও তরকারি', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80', 2),
-  ('cat_fastfood', 'fast-food', 'Burgers & Fast Food', 'বার্গার ও ফাস্টফুড', 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80', 3),
-  ('cat_snacks', 'snacks', 'Evening Snacks', 'সান্ধ্যকালীন নাশতা', 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80', 4),
-  ('cat_cakes', 'cakes', 'Homemade Cakes', 'হোমমেড কেক', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 5)
-ON CONFLICT (slug) DO NOTHING;
+-- 12. RPC Functions
+CREATE OR REPLACE FUNCTION public.increment_sales_count(prod_id TEXT, qty INTEGER DEFAULT 1)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE public.products
+  SET sales_count = COALESCE(sales_count, 0) + qty
+  WHERE id = prod_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 12. Realtime Publication for Live Synchronization
+CREATE OR REPLACE FUNCTION public.increment_rider_earnings(r_id TEXT, fee NUMERIC DEFAULT 35.0)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE public.riders
+  SET total_deliveries = COALESCE(total_deliveries, 0) + 1,
+      total_earnings = COALESCE(total_earnings, 0) + fee,
+      balance = COALESCE(balance, 0) + fee,
+      updated_at = NOW()
+  WHERE id = r_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 13. Realtime Publication for Live Synchronization
 DO $$
 BEGIN
-  -- orders realtime
   IF NOT EXISTS (
     SELECT 1 FROM pg_publication_tables 
     WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'orders'
@@ -248,7 +297,6 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
   END IF;
 
-  -- riders realtime (live location tracking)
   IF NOT EXISTS (
     SELECT 1 FROM pg_publication_tables 
     WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'riders'
@@ -256,7 +304,6 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.riders;
   END IF;
 
-  -- products realtime (availability updates)
   IF NOT EXISTS (
     SELECT 1 FROM pg_publication_tables 
     WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'products'
@@ -265,7 +312,7 @@ BEGIN
   END IF;
 END $$;
 
--- 13. Row Level Security (RLS) Configuration
+-- 14. Row Level Security (RLS) Configuration
 ALTER TABLE public.restaurants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
@@ -323,7 +370,7 @@ CREATE POLICY "Admin full control on settings" ON public.app_settings FOR ALL US
 DROP POLICY IF EXISTS "Admin full control on delivery zones" ON public.delivery_zones;
 CREATE POLICY "Admin full control on delivery zones" ON public.delivery_zones FOR ALL USING (true);
 
--- 14. Performance Indexes
+-- 15. Performance Indexes
 CREATE INDEX IF NOT EXISTS idx_products_restaurant ON public.products(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status);

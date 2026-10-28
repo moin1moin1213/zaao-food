@@ -78,7 +78,7 @@ export default function App() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [rider.id]);
 
   // Online / Offline Switch
   const toggleOnlineSwitch = async () => {
@@ -451,9 +451,47 @@ export default function App() {
               </View>
             </View>
 
+            {/* Registered Rider Switcher for Mathbaria */}
+            <View style={{ marginTop: 16 }}>
+              <Text style={[styles.sectionHeading, { marginBottom: 8 }]}>
+                {lang === "bn" ? "রাইডার একাউন্ট নির্বাচন করুন (সুইচ):" : "Switch Rider Account:"}
+              </Text>
+              {[
+                { id: "rdr_1", name: "Tariqul Islam", phone: "01711223344", vehicle: "Honda 125 (Barishal-Ha-1234)" },
+                { id: "rdr_2", name: "Shafiqur Rahman", phone: "01819876543", vehicle: "Discover 110 (Barishal-Ha-5678)" },
+                { id: "rdr_3", name: "Mehedi Hasan", phone: "01912340987", vehicle: "Runner Bike" },
+              ].map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={{
+                    padding: 10,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: rider.id === item.id ? "#FF6B1A" : "#E5E7EB",
+                    backgroundColor: rider.id === item.id ? "#FFF7ED" : "#FFFFFF",
+                    marginBottom: 6,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                  onPress={() => {
+                    setRider(item);
+                  }}
+                >
+                  <View>
+                    <Text style={{ fontWeight: "800", fontSize: 13, color: "#111827" }}>{item.name}</Text>
+                    <Text style={{ fontSize: 11, color: "#6B7280" }}>{item.phone} • {item.vehicle.split(" ")[0]}</Text>
+                  </View>
+                  {rider.id === item.id && (
+                    <Text style={{ color: "#FF6B1A", fontWeight: "900", fontSize: 11 }}>Active</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
             {/* Language Switch */}
             <TouchableOpacity
-              style={styles.langToggleBtn}
+              style={[styles.langToggleBtn, { marginTop: 14 }]}
               onPress={() => setLang(lang === "bn" ? "en" : "bn")}
             >
               <Text style={styles.langToggleText}>
@@ -478,7 +516,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "between",
+    justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBottomColor: "#1F2937",
   },

@@ -135,11 +135,7 @@ export const orderService = {
       paymentMethod: params.paymentMethod,
       paymentStatus: "pending",
       estimatedDeliveryMinutes: 30,
-      rider: {
-        name: "PenguFood Delivery Rider",
-        phone: "+880 1819-998877",
-        vehicle: "Delivery Bike",
-      },
+      rider: undefined,
     };
 
     // Save to Supabase if configured
