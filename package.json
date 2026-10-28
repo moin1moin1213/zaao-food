@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "clean": "node -e \"const fs = require('fs'); try { fs.rmSync('.next', { recursive: true, force: true }); fs.rmSync('tsconfig.tsbuildinfo', { force: true }); console.log('Cache cleaned successfully'); } catch(e){}\"",
-    "dev": "next dev",
-    "dev:clean": "npm run clean && next dev",
-    "dev:turbo": "next dev --turbopack",
+    "dev": "npm run dev --prefix customer-web",
+    "dev:customer": "npm run dev --prefix customer-web",
+    "dev:admin": "npm run dev --prefix admin-portal",
+    "dev:restaurant": "npm run dev --prefix restaurant-portal",
+    "dev:rider": "npm run web --prefix rider-app",
     "build": "next build",
-    "start": "next start",
+    "build:all": "npm run build --prefix customer-web && npm run build --prefix admin-portal && npm run build --prefix restaurant-portal",
+    "start": "npm run start --prefix customer-web",
     "lint": "next lint",
     "test": "node src/lib/__tests__/verifyAll.mjs"
   },
