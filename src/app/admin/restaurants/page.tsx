@@ -14,7 +14,10 @@ import {
   Save,
   X,
   Search,
+  Trash2,
+  UtensilsCrossed,
 } from "lucide-react";
+import Link from "next/link";
 import { adminService } from "@/services/adminService";
 import { Restaurant } from "@/services/types";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -71,6 +74,20 @@ export default function AdminRestaurantsPage() {
   const handleToggleStatus = async (r: Restaurant) => {
     await adminService.saveRestaurant({ id: r.id, isOpen: !r.isOpen });
     loadRestaurants();
+  };
+
+  const handleDeleteRestaurant = async (id: string, name: string) => {
+    const confirmMsg = lang === "bn"
+      ? `আপনি কি নিশ্চিত যে "${name}" রেস্তোরাঁ এবং এর অন্তর্ভুক্ত সকল খাবার মুছে ফেলতে চান?`
+      : `Are you sure you want to delete "${name}" and all associated products?`;
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      await adminService.deleteRestaurant(id);
+      await loadRestaurants();
+    } catch (err) {
+      console.error("Delete restaurant error:", err);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -189,26 +206,48 @@ export default function AdminRestaurantsPage() {
 
             {/* Actions Footer */}
             <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/30">
-              <button
-                type="button"
-                onClick={() => handleToggleStatus(r)}
-                className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-colors ${
-                  r.isOpen
-                    ? "bg-red-50 text-red-600 hover:bg-red-100"
-                    : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                }`}
-              >
-                {r.isOpen ? (lang === "bn" ? "বন্ধ করুন" : "Set Closed") : (lang === "bn" ? "খুলুন" : "Set Open")}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleToggleStatus(r)}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-colors ${
+                    r.isOpen
+                      ? "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 hover:bg-amber-100"
+                      : "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300 hover:bg-emerald-100"
+                  }`}
+                >
+                  {r.isOpen ? (lang === "bn" ? "বন্ধ করুন" : "Set Closed") : (lang === "bn" ? "খুলুন" : "Set Open")}
+                </button>
 
-              <button
-                type="button"
-                onClick={() => handleOpenEditModal(r)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF6B1A] hover:underline"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-                <span>{lang === "bn" ? "এডিট" : "Edit Details"}</span>
-              </button>
+                <Link
+                  href={`/admin/foods?restaurantId=${r.id}`}
+                  className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#FF6B1A] hover:bg-orange-100 transition-colors"
+                >
+                  <UtensilsCrossed className="w-3.5 h-3.5" />
+                  <span>{lang === "bn" ? "খাবার তালিকা" : "Foods"}</span>
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOpenEditModal(r)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF6B1A] hover:underline"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  <span>{lang === "bn" ? "এডিট" : "Edit"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDeleteRestaurant(r.id, r.nameEn)}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-700 transition-colors"
+                  title={lang === "bn" ? "রেস্তোরাঁ মুছুন" : "Delete Restaurant"}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{lang === "bn" ? "মুছুন" : "Delete"}</span>
+                </button>
+              </div>
             </div>
           </div>
         ))}

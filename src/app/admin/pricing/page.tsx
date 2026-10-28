@@ -11,6 +11,9 @@ import {
   ShieldCheck,
   RefreshCw,
   Info,
+  Plus,
+  Trash2,
+  X,
 } from "lucide-react";
 import { adminService } from "@/services/adminService";
 import { DeliveryZone } from "@/services/types";
@@ -95,19 +98,71 @@ export default function AdminPricingPage() {
     }
   };
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newZone, setNewZone] = useState({
+    nameEn: "",
+    nameBn: "",
+    minDistanceKm: 0,
+    maxDistanceKm: 5,
+    regularFee: 50,
+    cakeFee: 120,
+    isActive: true,
+  });
+
+  const handleAddZone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await adminService.saveDeliveryZone(newZone);
+      setIsAddModalOpen(false);
+      setSuccessMessage(
+        lang === "bn" ? "নতুন ডেলিভারি জোন সফলভাবে যুক্ত হয়েছে!" : "Delivery zone added successfully!"
+      );
+      loadZones();
+    } catch (e) {
+      setErrorMessage("Failed to add delivery zone.");
+    }
+  };
+
+  const handleDeleteZone = async (zoneId: string, zoneName: string) => {
+    const confirmMsg =
+      lang === "bn"
+        ? `আপনি কি নিশ্চিত যে "${zoneName}" জোনটি মুছে ফেলতে চান?`
+        : `Are you sure you want to delete zone "${zoneName}"?`;
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      await adminService.deleteDeliveryZone(zoneId);
+      setSuccessMessage(lang === "bn" ? "ডেলিভারি জোন সফলভাবে মোছা হয়েছে!" : "Zone deleted successfully!");
+      loadZones();
+    } catch (e) {
+      setErrorMessage("Failed to delete delivery zone.");
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 flex items-center gap-3">
-          <DollarSign className="w-8 h-8 text-[#FF6B1A]" />
-          <span>{lang === "bn" ? "ডেলিভারি চার্জ ও জোন কনফিগারেশন" : "Dynamic Delivery Pricing"}</span>
-        </h1>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-          {lang === "bn"
-            ? "সোর্স কোড পরিবর্তন ছাড়াই এখান থেকে যেকোনো জোনের ডেলিভারি ফি পরিবর্তন করুন।"
-            : "Adjust delivery rates directly from this panel without editing any source code."}
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 flex items-center gap-3">
+            <DollarSign className="w-8 h-8 text-[#FF6B1A]" />
+            <span>{lang === "bn" ? "ডেলিভারি চার্জ ও জোন কনফিগারেশন" : "Dynamic Delivery Pricing"}</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {lang === "bn"
+              ? "সোর্স কোড পরিবর্তন ছাড়াই এখান থেকে যেকোনো জোনের ডেলিভারি ফি পরিবর্তন করুন।"
+              : "Adjust delivery rates directly from this panel without editing any source code."}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsAddModalOpen(true)}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#FF6B1A] text-white text-xs font-bold hover:bg-orange-600 transition-colors shadow-md shadow-orange-500/20 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>{lang === "bn" ? "নতুন জোন যুক্ত করুন" : "Add Delivery Zone"}</span>
+        </button>
       </div>
 
       {/* Alerts */}
@@ -161,9 +216,19 @@ export default function AdminPricingPage() {
                   </div>
                 </div>
 
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 w-fit">
-                  Active Delivery Zone
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 w-fit">
+                    Active Delivery Zone
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteZone(zone.id, zone.nameEn)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                    title={lang === "bn" ? "জোন মুছুন" : "Delete Zone"}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Fee Inputs */}
@@ -225,6 +290,122 @@ export default function AdminPricingPage() {
           );
         })}
       </div>
+
+      {/* Add Zone Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-850 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+              <h3 className="text-base font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Truck className="w-5 h-5 text-[#FF6B1A]" />
+                <span>{lang === "bn" ? "নতুন ডেলিভারি জোন তৈরি করুন" : "Add Delivery Zone"}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddZone} className="space-y-4 text-xs font-bold">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-gray-600 dark:text-gray-300">Zone Name (English) *</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="e.g. Tikikata Union (4-6 km)"
+                    value={newZone.nameEn}
+                    onChange={(e) => setNewZone({ ...newZone, nameEn: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-600 dark:text-gray-300">Zone Name (Bangla) *</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="যেমন: টিকিকাটা ইউনিয়ন (৪-৬ কিমি)"
+                    value={newZone.nameBn}
+                    onChange={(e) => setNewZone({ ...newZone, nameBn: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-gray-600 dark:text-gray-300">Min Distance (km) *</label>
+                  <input
+                    required
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={newZone.minDistanceKm}
+                    onChange={(e) => setNewZone({ ...newZone, minDistanceKm: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-600 dark:text-gray-300">Max Distance (km) *</label>
+                  <input
+                    required
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    value={newZone.maxDistanceKm}
+                    onChange={(e) => setNewZone({ ...newZone, maxDistanceKm: parseFloat(e.target.value) || 1 })}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-gray-600 dark:text-gray-300">Regular Food Fee (৳) *</label>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    value={newZone.regularFee}
+                    onChange={(e) => setNewZone({ ...newZone, regularFee: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-600 dark:text-gray-300">Cake Delivery Fee (৳) *</label>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    value={newZone.cakeFee}
+                    onChange={(e) => setNewZone({ ...newZone, cakeFee: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-[#FF6B1A] text-white hover:bg-orange-600 shadow-md font-bold"
+                >
+                  Save Zone
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

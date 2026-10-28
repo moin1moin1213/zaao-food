@@ -1,7 +1,8 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
-import { Order, OrderStatus, Restaurant, RiderProfile, DeliveryZone, Coupon, AdminStats, PromoBanner } from "./types";
+import { Order, OrderStatus, Restaurant, RiderProfile, DeliveryZone, Coupon, AdminStats, PromoBanner, FoodItem, Category } from "./types";
 import { safeLocalStorageGet, safeLocalStorageSet } from "@/lib/storage/safeStorage";
-import { MOCK_RESTAURANTS } from "./mockData";
+import { MOCK_RESTAURANTS, MOCK_FOODS, MOCK_CATEGORIES } from "./mockData";
+import { catalogService } from "./catalogService";
 
 const MOCK_ZONES: DeliveryZone[] = [
   {
@@ -272,6 +273,21 @@ export const adminService = {
     const restId = restaurant.id || `rest_${Math.random().toString(36).substr(2, 8)}`;
     const slug = restaurant.slug || restaurant.nameEn?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || `rest-${Date.now()}`;
 
+    // Try server API first for service_role privileges
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_restaurant",
+          payload: { ...restaurant, id: restId, slug },
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      // fallback
+    }
+
     if (supabase && isSupabaseConfigured) {
       try {
         const payload: any = {
@@ -280,23 +296,18 @@ export const adminService = {
           name_en: restaurant.nameEn,
           name_bn: restaurant.nameBn,
           phone: restaurant.phone || restaurant.ownerPhone,
-          owner_phone: restaurant.ownerPhone,
           image_url: restaurant.image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80",
           banner_url: restaurant.banner || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
           cuisines_en: restaurant.cuisinesEn || ["Bangladeshi"],
           cuisines_bn: restaurant.cuisinesBn || ["বাংলাদেশি"],
           is_open: restaurant.isOpen ?? true,
-          opening_hours_en: restaurant.openingHoursEn || "10:00 AM - 10:00 PM",
-          opening_hours_bn: restaurant.openingHoursBn || "সকাল ১০:০০ - রাত ১০:০০",
           min_order: restaurant.minOrder || 0,
           address_en: restaurant.addressEn || "Mathbaria Bazar",
           address_bn: restaurant.addressBn || "মঠবাড়িয়া বাজার",
           prep_time_minutes: restaurant.prepTimeMinutes || 25,
-          commission_rate: restaurant.commissionRate || 15.0,
-          updated_at: new Date().toISOString(),
         };
 
-        const { error } = await supabase.from("restaurants").upsert(payload);
+        const { error } = await supabase.from("restaurants").upsert(payload, { onConflict: "id" });
         if (!error) return true;
       } catch (err) {
         console.warn("Supabase saveRestaurant error:", err);
@@ -334,6 +345,139 @@ export const adminService = {
       list.unshift(newEntry);
     }
     safeLocalStorageSet("admin_restaurants", list);
+    return true;
+  },
+
+  async deleteRestaurant(restaurantId: string): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete_restaurant",
+          payload: { id: restaurantId },
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      // fallback
+    }
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase.from("products").delete().eq("restaurant_id", restaurantId);
+        await supabase.from("restaurants").delete().eq("id", restaurantId);
+      } catch (err) {
+        console.warn("Supabase deleteRestaurant error:", err);
+      }
+    }
+
+    const list = await this.getRestaurants();
+    const updated = list.filter((r) => r.id !== restaurantId);
+    safeLocalStorageSet("admin_restaurants", updated);
+    return true;
+  },
+
+  // 4b. Foods / Products Management
+  async getFoods(options?: { restaurantId?: string; categoryId?: string; search?: string }): Promise<FoodItem[]> {
+    return catalogService.getFoods({
+      restaurantId: options?.restaurantId,
+      searchQuery: options?.search,
+    });
+  },
+
+  async saveFood(food: Partial<FoodItem>): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_food",
+          payload: food,
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      // fallback
+    }
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        const payload: any = {
+          id: food.id || `food_${Date.now()}`,
+          slug: food.slug || `${food.nameEn?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "food"}-${Date.now().toString().slice(-4)}`,
+          restaurant_id: food.restaurantId,
+          category_id: food.categoryId,
+          name_en: food.nameEn,
+          name_bn: food.nameBn,
+          description_en: food.descriptionEn || "",
+          description_bn: food.descriptionBn || "",
+          price: Number(food.price),
+          original_price: food.originalPrice ? Number(food.originalPrice) : null,
+          image_url: food.image,
+          is_available: food.isAvailable ?? true,
+          is_popular: food.isPopular ?? false,
+          is_recommended: food.isRecommended ?? false,
+          is_cake: food.isCake ?? false,
+          cake_advance_days: food.minAdvanceDays || 2,
+        };
+
+        const { error } = await supabase.from("products").upsert(payload, { onConflict: "id" });
+        if (!error) return true;
+      } catch (err) {
+        console.warn("Supabase saveFood error:", err);
+      }
+    }
+    return true;
+  },
+
+  async deleteFood(foodId: string): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete_food",
+          payload: { id: foodId },
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      // fallback
+    }
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase.from("products").delete().eq("id", foodId);
+      } catch (err) {
+        console.warn("Supabase deleteFood error:", err);
+      }
+    }
+    return true;
+  },
+
+  async toggleFoodAvailability(foodId: string, isAvailable: boolean): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle_food_availability",
+          payload: { id: foodId, isAvailable },
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      // fallback
+    }
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase.from("products").update({ is_available: isAvailable }).eq("id", foodId);
+      } catch (err) {
+        console.warn("Supabase toggleFoodAvailability error:", err);
+      }
+    }
     return true;
   },
 
@@ -484,6 +628,90 @@ export const adminService = {
       return true;
     }
     return false;
+  },
+
+  async saveDeliveryZone(zone: Partial<DeliveryZone>): Promise<boolean> {
+    const zoneId = zone.id || `zone_${Date.now()}`;
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_zone",
+          payload: { ...zone, id: zoneId },
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      // fallback
+    }
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        const payload: any = {
+          id: zoneId,
+          name_en: zone.nameEn,
+          name_bn: zone.nameBn,
+          min_distance_km: zone.minDistanceKm,
+          max_distance_km: zone.maxDistanceKm,
+          regular_fee: zone.regularFee,
+          cake_fee: zone.cakeFee,
+          is_active: zone.isActive ?? true,
+        };
+        await supabase.from("delivery_zones").upsert(payload, { onConflict: "id" });
+      } catch (err) {
+        console.warn("Supabase saveDeliveryZone error:", err);
+      }
+    }
+
+    const zones = await this.getDeliveryZones();
+    const existingIdx = zones.findIndex((z) => z.id === zoneId);
+    const updatedZone: DeliveryZone = {
+      id: zoneId,
+      nameEn: zone.nameEn || "Delivery Zone",
+      nameBn: zone.nameBn || "ডেলিভারি এলাকা",
+      minDistanceKm: zone.minDistanceKm || 0,
+      maxDistanceKm: zone.maxDistanceKm || 2,
+      regularFee: zone.regularFee || 40,
+      cakeFee: zone.cakeFee || 100,
+      isActive: zone.isActive ?? true,
+    };
+    if (existingIdx >= 0) {
+      zones[existingIdx] = updatedZone;
+    } else {
+      zones.push(updatedZone);
+    }
+    safeLocalStorageSet("admin_delivery_zones", zones);
+    return true;
+  },
+
+  async deleteDeliveryZone(zoneId: string): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete_zone",
+          payload: { id: zoneId },
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      // fallback
+    }
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase.from("delivery_zones").delete().eq("id", zoneId);
+      } catch (err) {
+        console.warn("Supabase deleteDeliveryZone error:", err);
+      }
+    }
+
+    const zones = await this.getDeliveryZones();
+    const updated = zones.filter((z) => z.id !== zoneId);
+    safeLocalStorageSet("admin_delivery_zones", updated);
+    return true;
   },
 
   // 7. Promotional Coupons

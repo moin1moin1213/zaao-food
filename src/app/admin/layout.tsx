@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   Layers,
+  UtensilsCrossed,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { href: "/admin/orders", label: "Orders Stream", labelBn: "লাইভ অর্ডার", icon: ShoppingBag },
   { href: "/admin/pricing", label: "Delivery Pricing", labelBn: "ডেলিভারি চার্জ", icon: DollarSign },
   { href: "/admin/restaurants", label: "Restaurants", labelBn: "রেস্তোরাঁ", icon: Store },
+  { href: "/admin/foods", label: "Food & Menu", labelBn: "খাবার ও মেনু", icon: UtensilsCrossed },
   { href: "/admin/riders", label: "Riders Fleet", labelBn: "রাইডার তালিকা", icon: Bike },
   { href: "/admin/promotions", label: "Promotions", labelBn: "অফার ও কুপন", icon: Tag },
 ];
