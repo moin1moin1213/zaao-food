@@ -80,14 +80,14 @@ BEGIN
     )
     SELECT
         ds.d_date AS day_date,
-        COUNT(do.status)::BIGINT AS orders_received,
-        COUNT(CASE WHEN do.status = 'delivered' THEN 1 END)::BIGINT AS completed_orders,
-        COUNT(CASE WHEN do.status = 'cancelled' THEN 1 END)::BIGINT AS cancelled_orders,
-        COALESCE(SUM(CASE WHEN do.status = 'delivered' THEN do.subtotal ELSE 0 END), 0.00) AS gross_food_sales,
-        COALESCE(SUM(CASE WHEN do.status = 'delivered' THEN do.commission_amount ELSE 0 END), 0.00) AS platform_commission,
-        COALESCE(SUM(CASE WHEN do.status = 'delivered' THEN (do.subtotal - do.commission_amount) ELSE 0 END), 0.00) AS net_restaurant_payout
+        COUNT(dord.status)::BIGINT AS orders_received,
+        COUNT(CASE WHEN dord.status = 'delivered' THEN 1 END)::BIGINT AS completed_orders,
+        COUNT(CASE WHEN dord.status = 'cancelled' THEN 1 END)::BIGINT AS cancelled_orders,
+        COALESCE(SUM(CASE WHEN dord.status = 'delivered' THEN dord.subtotal ELSE 0 END), 0.00) AS gross_food_sales,
+        COALESCE(SUM(CASE WHEN dord.status = 'delivered' THEN dord.commission_amount ELSE 0 END), 0.00) AS platform_commission,
+        COALESCE(SUM(CASE WHEN dord.status = 'delivered' THEN (dord.subtotal - dord.commission_amount) ELSE 0 END), 0.00) AS net_restaurant_payout
     FROM date_series ds
-    LEFT JOIN day_orders do ON ds.d_date = do.ord_date
+    LEFT JOIN day_orders dord ON ds.d_date = dord.ord_date
     GROUP BY ds.d_date
     ORDER BY ds.d_date ASC;
 END;
