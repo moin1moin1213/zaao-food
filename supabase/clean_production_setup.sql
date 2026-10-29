@@ -133,6 +133,7 @@ CREATE TRIGGER update_restaurants_modtime
 -- ====================================================================
 CREATE TABLE IF NOT EXISTS public.restaurant_staff (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    auth_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     restaurant_id TEXT NOT NULL REFERENCES public.restaurants(id) ON DELETE CASCADE,
     login_id TEXT NOT NULL UNIQUE, -- e.g. rest-1, rest-2
     full_name TEXT NOT NULL,
@@ -422,6 +423,7 @@ CREATE INDEX IF NOT EXISTS idx_customers_auth_id ON public.customers(auth_user_i
 CREATE INDEX IF NOT EXISTS idx_admin_username ON public.administrators(username);
 CREATE INDEX IF NOT EXISTS idx_staff_restaurant ON public.restaurant_staff(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_staff_login_id ON public.restaurant_staff(login_id);
+CREATE INDEX IF NOT EXISTS idx_staff_auth_id ON public.restaurant_staff(auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_products_restaurant ON public.products(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_available ON public.products(is_available);
