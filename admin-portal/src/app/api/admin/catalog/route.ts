@@ -174,7 +174,44 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true });
       }
 
-      // 3. Delivery Zone Actions
+      // 3. Category Actions (Add / Edit / Delete from Admin Panel)
+      case "save_category": {
+        const { id, slug, nameEn, nameBn, descriptionEn, descriptionBn, image, isCakeCategory, displayOrder } = payload;
+        const catId = id || `cat_${Date.now()}`;
+        const catSlug = slug || `${nameEn?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "category"}-${Date.now().toString().slice(-4)}`;
+        const dbPayload: any = {
+          id: catId,
+          slug: catSlug,
+          name_en: nameEn,
+          name_bn: nameBn,
+          description_en: descriptionEn || "",
+          description_bn: descriptionBn || "",
+          image_url: image || "",
+          is_cake_category: Boolean(isCakeCategory),
+          display_order: Number(displayOrder) || 1,
+        };
+
+        const { data, error } = await supabaseAdmin
+          .from("categories")
+          .upsert(dbPayload, { onConflict: "id" })
+          .select();
+
+        if (error) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+        return NextResponse.json({ success: true, data });
+      }
+
+      case "delete_category": {
+        const { id } = payload;
+        const { error } = await supabaseAdmin.from("categories").delete().eq("id", id);
+        if (error) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+        return NextResponse.json({ success: true });
+      }
+
+      // 4. Delivery Zone Actions
       case "save_zone": {
         const { id, nameEn, nameBn, minDistanceKm, maxDistanceKm, regularFee, cakeFee, isActive } = payload;
         const zoneId = id || `zone_${Date.now()}`;

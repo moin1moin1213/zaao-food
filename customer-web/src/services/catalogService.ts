@@ -16,7 +16,7 @@ export const catalogService = {
           .select("*")
           .order("display_order", { ascending: true });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           return data.map((c) => ({
             id: c.id,
             slug: c.slug,
@@ -32,7 +32,7 @@ export const catalogService = {
         console.warn("Supabase categories query error, using local fallback:", err);
       }
     }
-    return MOCK_CATEGORIES;
+    return [];
   },
 
   async getCategoryBySlug(slug: string): Promise<Category | null> {

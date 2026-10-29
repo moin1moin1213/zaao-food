@@ -108,35 +108,37 @@ export default function HomePage() {
       </section>
 
       {/* 2. Food Categories */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-gray-100">
-              {t.home.categoriesTitle}
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {lang === "bn" ? "আপনার পছন্দের খাবার নির্বাচন করুন" : "Browse by dining category"}
-            </p>
+      {(loading || categories.length > 0) && (
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-gray-100">
+                {t.home.categoriesTitle}
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {lang === "bn" ? "আপনার পছন্দের খাবার নির্বাচন করুন" : "Browse by dining category"}
+              </p>
+            </div>
+            <Link
+              href="/categories"
+              className="text-xs font-bold text-[#FF6B1A] hover:underline flex items-center gap-1"
+            >
+              <span>{t.common.viewAll}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <Link
-            href="/categories"
-            className="text-xs font-bold text-[#FF6B1A] hover:underline flex items-center gap-1"
-          >
-            <span>{t.common.viewAll}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
 
-        {loading ? (
-          <LoadingSkeleton count={6} />
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
-            {categories.map((cat) => (
-              <CategoryCard key={cat.id} category={cat} />
-            ))}
-          </div>
-        )}
-      </section>
+          {loading ? (
+            <LoadingSkeleton count={6} />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
+              {categories.map((cat) => (
+                <CategoryCard key={cat.id} category={cat} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* 3. Popular Foods */}
       {(loading || popularFoods.length > 0) && (

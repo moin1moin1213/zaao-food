@@ -4,83 +4,9 @@ import { safeLocalStorageGet, safeLocalStorageSet } from "@/lib/storage/safeStor
 import { MOCK_RESTAURANTS, MOCK_FOODS, MOCK_CATEGORIES } from "./mockData";
 import { catalogService } from "./catalogService";
 
-const MOCK_ZONES: DeliveryZone[] = [
-  {
-    id: "zone_0_2",
-    nameEn: "Mathbaria Town Core (0-2 km)",
-    nameBn: "মঠবাড়িয়া পৌর এলাকা (০-২ কিমি)",
-    minDistanceKm: 0.0,
-    maxDistanceKm: 2.0,
-    regularFee: 40,
-    cakeFee: 100,
-    isActive: true,
-  },
-  {
-    id: "zone_2_3",
-    nameEn: "Extended Town (2-3 km)",
-    nameBn: "পৌর সীমানা সংলগ্ন (২-৩ কিমি)",
-    minDistanceKm: 2.0,
-    maxDistanceKm: 3.0,
-    regularFee: 60,
-    cakeFee: 100,
-    isActive: true,
-  },
-  {
-    id: "zone_3_8",
-    nameEn: "Suburbs & Union Cakes (3-8 km)",
-    nameBn: "উপশহর ও ইউনিয়ন কেক ডেলিভারি (৩-৮ কিমি)",
-    minDistanceKm: 3.0,
-    maxDistanceKm: 8.0,
-    regularFee: 150,
-    cakeFee: 150,
-    isActive: true,
-  },
-];
+const MOCK_ZONES: DeliveryZone[] = [];
 
-const MOCK_RIDERS: RiderProfile[] = [
-  {
-    id: "rdr_1",
-    name: "Tariqul Islam",
-    phone: "01711223344",
-    vehicle: "Honda 125 (Dhaka Metro-Ha-1234)",
-    isActive: true,
-    isOnline: true,
-    currentLat: 22.2865,
-    currentLng: 89.9620,
-    totalDeliveries: 42,
-    totalEarnings: 1470,
-    balance: 520,
-    rating: 4.9,
-  },
-  {
-    id: "rdr_2",
-    name: "Shafiqur Rahman",
-    phone: "01819876543",
-    vehicle: "Discover 110 (Barishal-Ha-5678)",
-    isActive: true,
-    isOnline: true,
-    currentLat: 22.2842,
-    currentLng: 89.9602,
-    totalDeliveries: 28,
-    totalEarnings: 980,
-    balance: 350,
-    rating: 4.8,
-  },
-  {
-    id: "rdr_3",
-    name: "Mehedi Hasan",
-    phone: "01912340987",
-    vehicle: "Runner Bike",
-    isActive: true,
-    isOnline: false,
-    currentLat: 22.2850,
-    currentLng: 89.9610,
-    totalDeliveries: 15,
-    totalEarnings: 525,
-    balance: 175,
-    rating: 4.7,
-  },
-];
+const MOCK_RIDERS: RiderProfile[] = [];
 
 export const adminService = {
   // 1. Executive Stats & Analytics
@@ -454,6 +380,54 @@ export const adminService = {
       }
     }
     return true;
+  },
+
+  // Categories Management (100% Admin Panel Driven)
+  async getCategories(): Promise<Category[]> {
+    return catalogService.getCategories();
+  },
+
+  async saveCategory(category: Partial<Category>): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_category",
+          payload: {
+            id: category.id,
+            slug: category.slug,
+            nameEn: category.nameEn,
+            nameBn: category.nameBn,
+            descriptionEn: category.descriptionEn,
+            descriptionBn: category.descriptionBn,
+            image: category.image,
+            isCakeCategory: category.isCakeCategory,
+          },
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      console.warn("Save category API error:", e);
+    }
+    return false;
+  },
+
+  async deleteCategory(categoryId: string): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete_category",
+          payload: { id: categoryId },
+        }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      console.warn("Delete category API error:", e);
+    }
+    return false;
   },
 
   async toggleFoodAvailability(foodId: string, isAvailable: boolean): Promise<boolean> {

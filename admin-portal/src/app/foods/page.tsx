@@ -97,7 +97,7 @@ function AdminFoodsContent() {
   const { lang, formatPrice } = useLanguage();
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -114,12 +114,14 @@ function AdminFoodsContent() {
   async function loadData() {
     setLoading(true);
     try {
-      const [foodsList, restList] = await Promise.all([
+      const [foodsList, restList, catList] = await Promise.all([
         adminService.getFoods(),
         adminService.getRestaurants(),
+        adminService.getCategories(),
       ]);
       setFoods(foodsList);
       setRestaurants(restList);
+      setCategories(catList);
     } catch (err) {
       console.error("Failed to load foods or restaurants:", err);
     } finally {
