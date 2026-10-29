@@ -781,8 +781,8 @@ export const adminService = {
     return true;
   },
 
-  // 8. Restaurant Password & Credentials Management
-  async getRestaurantPasswords(): Promise<Record<string, string>> {
+  // 8. Restaurant Password & Credentials Management (Hashed in Database)
+  async getRestaurantPasswordStatus(): Promise<Record<string, { isConfigured: boolean }>> {
     try {
       const res = await fetch("/api/admin/catalog", {
         method: "POST",
@@ -791,21 +791,15 @@ export const adminService = {
       });
       if (res.ok) {
         const data = await res.json();
-        return data.passwords || {};
+        return data.passwordsStatus || {};
       }
     } catch (err) {
-      console.warn("Failed to fetch restaurant passwords:", err);
+      console.warn("Failed to fetch restaurant password status:", err);
     }
-    return {
-      "rest-1": "kacchi123",
-      "rest-2": "bismillah123",
-      "rest-3": "cafe123",
-      "rest-4": "sultana123",
-      "rest-5": "roshona123",
-    };
+    return {};
   },
 
-  async updateRestaurantPassword(restaurantId: string, newPassword: string): Promise<boolean> {
+  async updateRestaurantPassword(restaurantId: string, newPassword: string): Promise<{ success: boolean; temporaryPassword?: string }> {
     try {
       const res = await fetch("/api/admin/catalog", {
         method: "POST",
@@ -817,11 +811,14 @@ export const adminService = {
       });
       if (res.ok) {
         const data = await res.json();
-        return Boolean(data.success);
+        return {
+          success: Boolean(data.success),
+          temporaryPassword: data.temporaryPlaintextPassword,
+        };
       }
     } catch (err) {
       console.error("Failed to update restaurant password:", err);
     }
-    return false;
+    return { success: false };
   },
 };

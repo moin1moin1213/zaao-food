@@ -2,16 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { catalogService } from "@/services/catalogService";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-
-const DEFAULT_RESTAURANT_PASSWORDS: Record<string, string> = {
-  "rest-1": "kacchi123",
-  "rest-2": "bismillah123",
-  "rest-3": "cafe123",
-  "rest-4": "sultana123",
-  "rest-5": "roshona123",
-};
-
-const MASTER_RESTAURANT_PIN = "123456";
+import { verifyPassword } from "@/lib/auth/password";
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +10,7 @@ export async function POST(req: Request) {
 
     if (!restaurantId || !password) {
       return NextResponse.json(
-        { success: false, error: "রেস্তোরাঁ এবং পাসওয়ার্ড উভয়ই প্রদান করুন" },
+        { success: false, error: "রেস্তোরাঁ আইডি এবং পাসওয়ার্ড উভয়ই প্রদান করুন" },
         { status: 400 }
       );
     }
@@ -35,8 +26,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Fetch dynamic passwords set by Admin in Supabase
-    let livePasswords: Record<string, string> = { ...DEFAULT_RESTAURANT_PASSWORDS };
+    // Fetch dynamic PBKDF2 hashed passwords set by Admin in Supabase
+    let livePasswords: Record<string, string> = {};
     if (supabaseAdmin) {
       try {
         const { data: settingsData } = await supabaseAdmin
@@ -46,21 +37,27 @@ export async function POST(req: Request) {
           .single();
 
         if (settingsData && settingsData.value) {
-          livePasswords = { ...livePasswords, ...settingsData.value };
+          livePasswords = settingsData.value;
         }
       } catch (err) {
-        console.warn("Could not fetch live passwords from Supabase, using defaults:", err);
+        console.warn("Could not fetch restaurant passwords from Supabase:", err);
       }
     }
 
-    // Verify password against live Supabase passwords
-    const expectedPassword = livePasswords[targetRest.id];
-    const isMasterMatch = password.trim() === MASTER_RESTAURANT_PIN;
-    const isSpecificMatch = expectedPassword && password.trim() === expectedPassword;
+    // Verify password against secure PBKDF2 SHA-512 hash
+    const storedHash = livePasswords[targetRest.id];
+    let isMatch = false;
 
-    if (!isMasterMatch && !isSpecificMatch) {
+    if (storedHash) {
+      isMatch = verifyPassword(password.trim(), storedHash);
+    } else {
+      // Fallback: Default temporary PIN for initial setup if not yet configured in DB
+      isMatch = password.trim() === "123456";
+    }
+
+    if (!isMatch) {
       return NextResponse.json(
-        { success: false, error: "ভুল পাসওয়ার্ড বা পিন! অনুগ্রহ করে সঠিক পাসওয়ার্ড দিন।" },
+        { success: false, error: "ভুল পাসওয়ার্ড! অ্যাডমিনের সাথে যোগাযোগ করে সঠিক পাসওয়ার্ড জেনে নিন।" },
         { status: 401 }
       );
     }
@@ -85,7 +82,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       restaurant: sessionData,
-      message: "রেস্তোরাঁ লগইন সফল হয়েছে!",
+      message: "রেস্তোরাঁ কিচেন পোর্টালে লগইন সফল হয়েছে!",
     });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

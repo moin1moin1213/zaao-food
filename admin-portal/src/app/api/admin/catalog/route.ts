@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { hashPassword } from "@/lib/auth/password";
 
 export async function POST(req: NextRequest) {
   if (!supabaseAdmin) {
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: error.message }, { status: 400 });
         }
 
-        // If password is provided, save to restaurant_passwords
+        // If password is provided, securely hash before saving
         if (payload.password && payload.password.trim()) {
           const { data: existing } = await supabaseAdmin
             .from("app_settings")
@@ -70,14 +71,14 @@ export async function POST(req: NextRequest) {
             .single();
 
           const currentMap = { ...(existing?.value || {}) };
-          currentMap[id] = payload.password.trim();
+          currentMap[id] = hashPassword(payload.password.trim());
 
           await supabaseAdmin
             .from("app_settings")
             .upsert({
               key: "restaurant_passwords",
               value: currentMap,
-              description: "Restaurant portal credentials and passwords managed by Admin",
+              description: "PBKDF2 SHA-512 securely hashed restaurant credentials",
               updated_at: new Date().toISOString(),
             }, { onConflict: "key" });
         }
@@ -208,41 +209,31 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true });
       }
 
-      // 4. Restaurant Password Management
+      // 4. Restaurant Password Management (Hashed & Never Plaintext in Database)
       case "get_restaurant_passwords": {
-        const defaultMap: Record<string, string> = {
-          "rest-1": "kacchi123",
-          "rest-2": "bismillah123",
-          "rest-3": "cafe123",
-          "rest-4": "sultana123",
-          "rest-5": "roshona123",
-        };
-
         const { data, error } = await supabaseAdmin
           .from("app_settings")
           .select("value")
           .eq("key", "restaurant_passwords")
           .single();
 
-        if (error || !data || !data.value) {
-          return NextResponse.json({ success: true, passwords: defaultMap });
+        const storedMap = data?.value || {};
+        // Return masked status map indicating password presence without revealing hashes or plaintext
+        const statusMap: Record<string, { isConfigured: boolean }> = {};
+        for (const [rId, val] of Object.entries(storedMap)) {
+          statusMap[rId] = { isConfigured: Boolean(val) };
         }
-        return NextResponse.json({ success: true, passwords: { ...defaultMap, ...data.value } });
+        return NextResponse.json({ success: true, passwordsStatus: statusMap });
       }
 
       case "update_restaurant_password": {
         const { restaurantId, newPassword } = payload;
-        if (!restaurantId || !newPassword) {
+        if (!restaurantId || !newPassword || !newPassword.trim()) {
           return NextResponse.json({ error: "Missing restaurantId or newPassword" }, { status: 400 });
         }
 
-        const defaultMap: Record<string, string> = {
-          "rest-1": "kacchi123",
-          "rest-2": "bismillah123",
-          "rest-3": "cafe123",
-          "rest-4": "sultana123",
-          "rest-5": "roshona123",
-        };
+        const trimmedPass = newPassword.trim();
+        const secureHashed = hashPassword(trimmedPass);
 
         const { data: existing } = await supabaseAdmin
           .from("app_settings")
@@ -250,22 +241,28 @@ export async function POST(req: NextRequest) {
           .eq("key", "restaurant_passwords")
           .single();
 
-        const currentMap = { ...defaultMap, ...(existing?.value || {}) };
-        currentMap[restaurantId] = newPassword.trim();
+        const currentMap = { ...(existing?.value || {}) };
+        currentMap[restaurantId] = secureHashed;
 
         const { error } = await supabaseAdmin
           .from("app_settings")
           .upsert({
             key: "restaurant_passwords",
             value: currentMap,
-            description: "Restaurant portal credentials and passwords managed by Admin",
+            description: "PBKDF2 SHA-512 securely hashed restaurant credentials",
             updated_at: new Date().toISOString(),
           }, { onConflict: "key" });
 
         if (error) {
           return NextResponse.json({ error: error.message }, { status: 400 });
         }
-        return NextResponse.json({ success: true, passwords: currentMap });
+
+        // Return temporary plaintext ONCE upon successful reset so Admin can copy it to the owner
+        return NextResponse.json({
+          success: true,
+          restaurantId,
+          temporaryPlaintextPassword: trimmedPass,
+        });
       }
 
       default:

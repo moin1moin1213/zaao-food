@@ -327,7 +327,7 @@ export default function RestaurantOrdersPage() {
               {order.customer.instructions && (
                 <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-3 rounded-2xl text-xs text-amber-800 dark:text-amber-300">
                   <FileText className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>Customer Note: {order.customer.instructions}</span>
+                  <span>{lang === "bn" ? "গ্রাহকের বিশেষ নির্দেশনা:" : "Customer Note:"} {order.customer.instructions}</span>
                 </div>
               )}
 
@@ -335,7 +335,7 @@ export default function RestaurantOrdersPage() {
               <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                 <div className="text-xs text-gray-400 font-semibold flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>Est. Prep: {formatNum(order.estimatedDeliveryMinutes || 25)} mins</span>
+                  <span>{lang === "bn" ? "প্রস্তুতির আনুমানিক সময়:" : "Est. Prep:"} {formatNum(order.estimatedDeliveryMinutes || 25)} {lang === "bn" ? "মিনিট" : "mins"}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -347,11 +347,11 @@ export default function RestaurantOrdersPage() {
                         onChange={(e) => setSelectedPrepTime(Number(e.target.value))}
                         className="px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-850 text-xs font-bold"
                       >
-                        <option value={15}>15 mins</option>
-                        <option value={20}>20 mins</option>
-                        <option value={25}>25 mins</option>
-                        <option value={35}>35 mins</option>
-                        <option value={45}>45 mins</option>
+                        <option value={15}>{formatNum(15)} {lang === "bn" ? "মিনিট" : "mins"}</option>
+                        <option value={20}>{formatNum(20)} {lang === "bn" ? "মিনিট" : "mins"}</option>
+                        <option value={25}>{formatNum(25)} {lang === "bn" ? "মিনিট" : "mins"}</option>
+                        <option value={35}>{formatNum(35)} {lang === "bn" ? "মিনিট" : "mins"}</option>
+                        <option value={45}>{formatNum(45)} {lang === "bn" ? "মিনিট" : "mins"}</option>
                       </select>
 
                       <button
@@ -359,7 +359,7 @@ export default function RestaurantOrdersPage() {
                         onClick={() => handleAccept(order.id)}
                         className="px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-colors"
                       >
-                        Accept Order
+                        {lang === "bn" ? "অর্ডার গ্রহণ করুন" : "Accept Order"}
                       </button>
 
                       <button
@@ -367,7 +367,7 @@ export default function RestaurantOrdersPage() {
                         onClick={() => setRejectingOrderId(order.id)}
                         className="px-3 py-2 rounded-xl text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
                       >
-                        Reject
+                        {lang === "bn" ? "প্রত্যাখ্যান" : "Reject"}
                       </button>
                     </>
                   )}
@@ -379,7 +379,7 @@ export default function RestaurantOrdersPage() {
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-[#FF6B1A] hover:bg-orange-600 shadow-md transition-colors"
                     >
                       <Flame className="w-4 h-4" />
-                      <span>Start Cooking</span>
+                      <span>{lang === "bn" ? "রান্না শুরু করুন" : "Start Cooking"}</span>
                     </button>
                   )}
 
@@ -390,14 +390,14 @@ export default function RestaurantOrdersPage() {
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-colors"
                     >
                       <Check className="w-4 h-4" />
-                      <span>Food Ready for Rider</span>
+                      <span>{lang === "bn" ? "খাবার প্রস্তুত (রাইডার পিকআপ)" : "Food Ready for Rider"}</span>
                     </button>
                   )}
 
                   {order.status === "ready_for_pickup" && (
                     <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
                       <Bike className="w-4 h-4" />
-                      <span>Waiting for Courier Handover...</span>
+                      <span>{lang === "bn" ? "রাইডারের জন্য অপেক্ষমাণ..." : "Waiting for Courier Handover..."}</span>
                     </span>
                   )}
                 </div>

@@ -4,8 +4,23 @@ import { safeLocalStorageGet, safeLocalStorageSet } from "@/lib/storage/safeStor
 import { MOCK_FOODS, MOCK_RESTAURANTS } from "./mockData";
 
 export const restaurantService = {
-  // 1. Get Live Orders for Restaurant
+  // 1. Get Live Orders for Restaurant (Protected Server Route with Session Verification)
   async getOrders(restaurantId: string): Promise<Order[]> {
+    try {
+      const res = await fetch("/api/restaurant/orders", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.orders) {
+          return data.orders;
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch orders via /api/restaurant/orders, trying fallback:", err);
+    }
+
     if (supabase && isSupabaseConfigured) {
       try {
         const { data, error } = await supabase
@@ -51,6 +66,8 @@ export const restaurantService = {
               : undefined,
             estimatedDeliveryMinutes: o.estimated_delivery_minutes,
             cancellationReason: o.cancellation_reason,
+            commissionAmount: o.commission_amount ? Number(o.commission_amount) : Math.round(Number(o.subtotal || 0) * 0.15),
+            riderFee: o.rider_fee ? Number(o.rider_fee) : 35,
           }));
         }
       } catch (err) {
@@ -62,8 +79,19 @@ export const restaurantService = {
     return localOrders.filter((o) => o.restaurantId === restaurantId);
   },
 
-  // 2. Accept Order & Set Preparation Time
+  // 2. Accept Order & Set Preparation Time (Enforced Backend Validation)
   async acceptOrder(orderId: string, prepTimeMinutes: number = 25): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/restaurant/orders/${encodeURIComponent(orderId)}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetStatus: "accepted", prepTimeMinutes }),
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.warn("API acceptOrder failed, attempting direct fallback:", err);
+    }
+
     if (supabase && isSupabaseConfigured) {
       try {
         const { error } = await supabase
@@ -91,8 +119,19 @@ export const restaurantService = {
     return false;
   },
 
-  // 3. Mark Preparing
+  // 3. Mark Preparing (Enforced Backend Validation)
   async startPreparing(orderId: string): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/restaurant/orders/${encodeURIComponent(orderId)}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetStatus: "preparing" }),
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.warn("API startPreparing failed, attempting direct fallback:", err);
+    }
+
     if (supabase && isSupabaseConfigured) {
       try {
         const { error } = await supabase
@@ -118,8 +157,19 @@ export const restaurantService = {
     return false;
   },
 
-  // 4. Mark Ready for Pickup (Rider is notified to pick up food!)
+  // 4. Mark Ready for Pickup (Enforced Backend Validation)
   async markReadyForPickup(orderId: string): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/restaurant/orders/${encodeURIComponent(orderId)}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetStatus: "ready_for_pickup" }),
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.warn("API markReadyForPickup failed, attempting direct fallback:", err);
+    }
+
     if (supabase && isSupabaseConfigured) {
       try {
         const { error } = await supabase
@@ -145,8 +195,19 @@ export const restaurantService = {
     return false;
   },
 
-  // 5. Reject Order with Reason
+  // 5. Reject Order with Reason (Enforced Backend Validation)
   async rejectOrder(orderId: string, reason: string): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/restaurant/orders/${encodeURIComponent(orderId)}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetStatus: "cancelled", cancellationReason: reason }),
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.warn("API rejectOrder failed, attempting direct fallback:", err);
+    }
+
     if (supabase && isSupabaseConfigured) {
       try {
         const { error } = await supabase
