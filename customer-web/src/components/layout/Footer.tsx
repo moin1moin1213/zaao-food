@@ -56,26 +56,6 @@ export function Footer() {
                   {t.nav.orders}
                 </Link>
               </li>
-              <li className="pt-2 border-t border-gray-200 dark:border-gray-800">
-                <a
-                  href={process.env.NEXT_PUBLIC_RESTAURANT_PORTAL_URL || "http://localhost:3002"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
-                >
-                  🏪 {lang === "bn" ? "রেস্তোরাঁ কিচেন পোর্টাল (Port 3002)" : "Restaurant Kitchen (Port 3002)"}
-                </a>
-              </li>
-              <li>
-                <a
-                  href={process.env.NEXT_PUBLIC_ADMIN_PORTAL_URL || "http://localhost:3001"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[#FF6B1A] font-bold hover:underline"
-                >
-                  ⚙ {lang === "bn" ? "অ্যাডমিন কন্ট্রোল প্যানেল (Port 3001)" : "Admin Dashboard (Port 3001)"}
-                </a>
-              </li>
             </ul>
           </div>
 

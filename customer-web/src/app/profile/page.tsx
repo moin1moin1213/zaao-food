@@ -169,42 +169,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Business Portals & Rider App */}
-      <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 p-6 shadow-xs space-y-3">
-        <h3 className="font-extrabold text-sm text-gray-900 dark:text-gray-100">
-          {lang === "bn" ? "পার্টনার ও অ্যাডমিন পোর্টাল" : "Business & Partner Portals"}
-        </h3>
-        <div className="space-y-2 text-xs font-semibold">
-          <Link
-            href="/restaurant"
-            className="flex items-center justify-between p-3 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100/60 transition-colors"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="text-base">🏪</span>
-              <div>
-                <div className="font-bold">{lang === "bn" ? "রেস্তোরাঁ কিচেন ড্যাশবোর্ড" : "Restaurant Kitchen Portal"}</div>
-                <div className="text-[10px] text-indigo-500 font-normal">{lang === "bn" ? "অর্ডার গ্রহণ ও খাবার প্রস্তুতি" : "Live kitchen dispatch & menu stock"}</div>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-indigo-400" />
-          </Link>
-
-          <Link
-            href="/admin"
-            className="flex items-center justify-between p-3 rounded-2xl bg-orange-50/60 dark:bg-orange-950/40 text-[#FF6B1A] hover:bg-orange-100/60 transition-colors"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="text-base">⚙</span>
-              <div>
-                <div className="font-bold">{lang === "bn" ? "অ্যাডমিন কন্ট্রোল প্যানেল" : "Admin HQ Control Room"}</div>
-                <div className="text-[10px] text-orange-600 font-normal">{lang === "bn" ? "ডেলিভারি চার্জ, রেস্তোরাঁ ও রাইডার ব্যবস্থাপনা" : "Pricing, fleet & business controls"}</div>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-orange-400" />
-          </Link>
-        </div>
-      </div>
-
       {/* Support & Legal Section */}
       <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 p-6 shadow-xs space-y-3">
         <h3 className="font-extrabold text-sm text-gray-900 dark:text-gray-100">
