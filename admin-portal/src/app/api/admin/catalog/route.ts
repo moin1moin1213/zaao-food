@@ -60,6 +60,28 @@ export async function POST(req: NextRequest) {
         if (error) {
           return NextResponse.json({ error: error.message }, { status: 400 });
         }
+
+        // If password is provided, save to restaurant_passwords
+        if (payload.password && payload.password.trim()) {
+          const { data: existing } = await supabaseAdmin
+            .from("app_settings")
+            .select("value")
+            .eq("key", "restaurant_passwords")
+            .single();
+
+          const currentMap = { ...(existing?.value || {}) };
+          currentMap[id] = payload.password.trim();
+
+          await supabaseAdmin
+            .from("app_settings")
+            .upsert({
+              key: "restaurant_passwords",
+              value: currentMap,
+              description: "Restaurant portal credentials and passwords managed by Admin",
+              updated_at: new Date().toISOString(),
+            }, { onConflict: "key" });
+        }
+
         return NextResponse.json({ success: true, data });
       }
 
@@ -184,6 +206,66 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: error.message }, { status: 400 });
         }
         return NextResponse.json({ success: true });
+      }
+
+      // 4. Restaurant Password Management
+      case "get_restaurant_passwords": {
+        const defaultMap: Record<string, string> = {
+          "rest-1": "kacchi123",
+          "rest-2": "bismillah123",
+          "rest-3": "cafe123",
+          "rest-4": "sultana123",
+          "rest-5": "roshona123",
+        };
+
+        const { data, error } = await supabaseAdmin
+          .from("app_settings")
+          .select("value")
+          .eq("key", "restaurant_passwords")
+          .single();
+
+        if (error || !data || !data.value) {
+          return NextResponse.json({ success: true, passwords: defaultMap });
+        }
+        return NextResponse.json({ success: true, passwords: { ...defaultMap, ...data.value } });
+      }
+
+      case "update_restaurant_password": {
+        const { restaurantId, newPassword } = payload;
+        if (!restaurantId || !newPassword) {
+          return NextResponse.json({ error: "Missing restaurantId or newPassword" }, { status: 400 });
+        }
+
+        const defaultMap: Record<string, string> = {
+          "rest-1": "kacchi123",
+          "rest-2": "bismillah123",
+          "rest-3": "cafe123",
+          "rest-4": "sultana123",
+          "rest-5": "roshona123",
+        };
+
+        const { data: existing } = await supabaseAdmin
+          .from("app_settings")
+          .select("value")
+          .eq("key", "restaurant_passwords")
+          .single();
+
+        const currentMap = { ...defaultMap, ...(existing?.value || {}) };
+        currentMap[restaurantId] = newPassword.trim();
+
+        const { error } = await supabaseAdmin
+          .from("app_settings")
+          .upsert({
+            key: "restaurant_passwords",
+            value: currentMap,
+            description: "Restaurant portal credentials and passwords managed by Admin",
+            updated_at: new Date().toISOString(),
+          }, { onConflict: "key" });
+
+        if (error) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+        return NextResponse.json({ success: true, passwords: currentMap });
       }
 
       default:

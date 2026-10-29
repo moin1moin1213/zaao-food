@@ -780,4 +780,48 @@ export const adminService = {
     }
     return true;
   },
+
+  // 8. Restaurant Password & Credentials Management
+  async getRestaurantPasswords(): Promise<Record<string, string>> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "get_restaurant_passwords", payload: {} }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.passwords || {};
+      }
+    } catch (err) {
+      console.warn("Failed to fetch restaurant passwords:", err);
+    }
+    return {
+      "rest-1": "kacchi123",
+      "rest-2": "bismillah123",
+      "rest-3": "cafe123",
+      "rest-4": "sultana123",
+      "rest-5": "roshona123",
+    };
+  },
+
+  async updateRestaurantPassword(restaurantId: string, newPassword: string): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_restaurant_password",
+          payload: { restaurantId, newPassword },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return Boolean(data.success);
+      }
+    } catch (err) {
+      console.error("Failed to update restaurant password:", err);
+    }
+    return false;
+  },
 };

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { catalogService } from "@/services/catalogService";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const DEFAULT_RESTAURANT_PASSWORDS: Record<string, string> = {
   "rest-1": "kacchi123",
@@ -34,8 +35,26 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verify password
-    const expectedPassword = DEFAULT_RESTAURANT_PASSWORDS[targetRest.id];
+    // Fetch dynamic passwords set by Admin in Supabase
+    let livePasswords: Record<string, string> = { ...DEFAULT_RESTAURANT_PASSWORDS };
+    if (supabaseAdmin) {
+      try {
+        const { data: settingsData } = await supabaseAdmin
+          .from("app_settings")
+          .select("value")
+          .eq("key", "restaurant_passwords")
+          .single();
+
+        if (settingsData && settingsData.value) {
+          livePasswords = { ...livePasswords, ...settingsData.value };
+        }
+      } catch (err) {
+        console.warn("Could not fetch live passwords from Supabase, using defaults:", err);
+      }
+    }
+
+    // Verify password against live Supabase passwords
+    const expectedPassword = livePasswords[targetRest.id];
     const isMasterMatch = password.trim() === MASTER_RESTAURANT_PIN;
     const isSpecificMatch = expectedPassword && password.trim() === expectedPassword;
 

@@ -7,7 +7,7 @@ import "@/styles/globals.css";
 import {
   Store,
   ShoppingBag,
-  UtensilsCrossed,
+  TrendingUp,
   Power,
   LogOut,
   ChefHat,
@@ -86,19 +86,19 @@ function KitchenNavbar() {
           }`}
         >
           <ShoppingBag className="w-4 h-4" />
-          <span>{lang === "bn" ? "অর্ডার সমূহ" : "Kitchen Orders"}</span>
+          <span>{lang === "bn" ? "লাইভ অর্ডার" : "Kitchen Orders"}</span>
         </Link>
 
         <Link
-          href="/menu"
+          href="/sales"
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-            pathname === "/menu"
+            pathname === "/sales"
               ? "bg-[#FF6B1A] text-white shadow-xs"
               : "text-gray-600 hover:bg-gray-100"
           }`}
         >
-          <UtensilsCrossed className="w-4 h-4" />
-          <span>{lang === "bn" ? "মেনু ও স্টক" : "Menu & Stock"}</span>
+          <TrendingUp className="w-4 h-4" />
+          <span>{lang === "bn" ? "দৈনিক ও সাপ্তাহিক বিক্রি" : "Daily & Weekly Sales"}</span>
         </Link>
       </nav>
 
