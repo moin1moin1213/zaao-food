@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 130" fill="none">
+  <!-- Motion speed lines -->
+  <path d="M125 32H155" stroke="#FF5722" stroke-width="4" stroke-linecap="round"/>
+  <path d="M110 40H145" stroke="#FF5722" stroke-width="4" stroke-linecap="round"/>
+  <path d="M120 48H140" stroke="#FF5722" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Delivery Rider on Bicycle Icon -->
+  <g transform="translate(140, 10) scale(0.72)">
+    <!-- Helmet / Head -->
+    <circle cx="50" cy="18" r="9" fill="#FF5722" />
+    <path d="M46 12C50 10 56 12 59 15C59 18 55 20 48 20" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Rider Torso leaning forward -->
+    <path d="M48 24L34 44L56 50" stroke="#1E2022" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Rider arms to handlebars -->
+    <path d="M42 32L62 36" stroke="#1E2022" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- Rider Legs pedaling -->
+    <path d="M34 44L28 62L44 68" stroke="#FF5722" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M34 44L44 58L38 72" stroke="#1E2022" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Bicycle Frame -->
+    <!-- Rear Wheel -->
+    <circle cx="16" cy="72" r="14" stroke="#1E2022" stroke-width="4" fill="none"/>
+    <circle cx="16" cy="72" r="4" fill="#FF5722"/>
+    <!-- Front Wheel -->
+    <circle cx="72" cy="72" r="14" stroke="#1E2022" stroke-width="4" fill="none"/>
+    <circle cx="72" cy="72" r="4" fill="#FF5722"/>
+
+    <!-- Frame Tubes -->
+    <path d="M16 72L38 72L56 52L36 52L16 72Z" stroke="#FF5722" stroke-width="3.5" fill="none" stroke-linejoin="round"/>
+    <path d="M38 72L36 48" stroke="#FF5722" stroke-width="3.5"/>
+    <path d="M56 52L64 36L61 34" stroke="#1E2022" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M64 42L72 72" stroke="#FF5722" stroke-width="3.5"/>
+
+    <!-- Delivery Box on Carrier Rack -->
+    <rect x="2" y="44" width="20" height="18" rx="3" fill="#FF5722" stroke="#1E2022" stroke-width="2.5" />
+    <path d="M6 53H18" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wordmark "ZaaoFood" -->
+  <text x="50" y="102" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="900" font-size="52" letter-spacing="-1">
+    <tspan fill="#FF5722">Zaao</tspan><tspan fill="#1E2022">Food</tspan>
+  </text>
+
+  <!-- Subtitle Tagline -->
+  <text x="75" y="122" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="600" font-size="14.5" fill="#5A6069" letter-spacing="3.2">
+    LOCAL FOOD DELIVERY
+  </text>
+</svg>
