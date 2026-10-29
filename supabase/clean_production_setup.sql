@@ -101,8 +101,8 @@ CREATE TABLE IF NOT EXISTS public.restaurants (
     phone TEXT,
     owner_phone TEXT,
     owner_email TEXT,
-    image_url TEXT NOT NULL,
-    banner_url TEXT NOT NULL,
+    image_url TEXT DEFAULT 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80',
+    banner_url TEXT DEFAULT 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
     cuisines_en TEXT[] DEFAULT '{}',
     cuisines_bn TEXT[] DEFAULT '{}',
     rating NUMERIC(2,1) DEFAULT 4.8,
@@ -111,8 +111,8 @@ CREATE TABLE IF NOT EXISTS public.restaurants (
     opening_hours_en TEXT DEFAULT '10:00 AM - 10:00 PM',
     opening_hours_bn TEXT DEFAULT 'সকাল ১০:০০ - রাত ১০:০০',
     min_order NUMERIC(10,2) DEFAULT 0.00,
-    address_en TEXT NOT NULL,
-    address_bn TEXT NOT NULL,
+    address_en TEXT DEFAULT 'Mathbaria',
+    address_bn TEXT DEFAULT 'মঠবাড়িয়া',
     latitude NUMERIC(9,6) DEFAULT 22.2858,
     longitude NUMERIC(9,6) DEFAULT 89.9614,
     distance_km NUMERIC(4,1) DEFAULT 1.0,
@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS public.categories (
     name_bn TEXT NOT NULL,
     description_en TEXT,
     description_bn TEXT,
-    image_url TEXT NOT NULL,
+    image_url TEXT DEFAULT '',
     display_order INTEGER DEFAULT 0,
     is_cake_category BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -201,14 +201,14 @@ CREATE TABLE IF NOT EXISTS public.products (
     id TEXT PRIMARY KEY DEFAULT ('prod_' || substr(md5(random()::text), 1, 8)),
     slug TEXT NOT NULL UNIQUE,
     restaurant_id TEXT NOT NULL REFERENCES public.restaurants(id) ON DELETE CASCADE,
-    category_id TEXT NOT NULL REFERENCES public.categories(id) ON DELETE RESTRICT,
+    category_id TEXT REFERENCES public.categories(id) ON DELETE SET NULL,
     name_en TEXT NOT NULL,
     name_bn TEXT NOT NULL,
     description_en TEXT,
     description_bn TEXT,
     price NUMERIC(10,2) NOT NULL CHECK (price >= 0),
     original_price NUMERIC(10,2),
-    image_url TEXT NOT NULL,
+    image_url TEXT DEFAULT 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
     is_available BOOLEAN DEFAULT true,
     is_popular BOOLEAN DEFAULT false,
     sales_count INTEGER DEFAULT 0,
@@ -923,13 +923,13 @@ CREATE POLICY "Admin manages app settings" ON public.app_settings
 -- Minimal System Foundation (Category Tags & Config for Admin Panel)
 -- NOTE: Zero mock foods, zero mock restaurants. The Admin adds those.
 -- ====================================================================
-INSERT INTO public.categories (id, slug, name_en, name_bn, description_en, description_bn, display_order, is_cake_category)
+INSERT INTO public.categories (id, slug, name_en, name_bn, description_en, description_bn, image_url, display_order, is_cake_category)
 VALUES
-  ('cat_biryani', 'biryani', 'Biryani & Polao', 'বিরিয়ানি ও পোলাও', 'Biryani & Traditional Meals', 'ঐতিহ্যবাহী বিরিয়ানি ও পোলাও', 1, false),
-  ('cat_rice', 'rice-meals', 'Rice & Curries', 'ভাত ও তরকারি', 'Daily traditional meals', 'প্রতিদিনের ভাত ও তরকারি', 2, false),
-  ('cat_fastfood', 'fast-food', 'Burgers & Fast Food', 'বার্গার ও ফাস্টফুড', 'Burgers, chicken and snacks', 'বার্গার ও ফাস্টফুড', 3, false),
-  ('cat_snacks', 'snacks', 'Evening Snacks', 'সান্ধ্যকালীন নাশতা', 'Tea snacks and evening items', 'সান্ধ্যকালীন নাশতা', 4, false),
-  ('cat_cakes', 'cakes', 'Homemade Cakes', 'হোমমেড কেক', 'Custom cakes and bakery', 'হোমমেড কেক ও বেকারি', 5, true)
+  ('cat_biryani', 'biryani', 'Biryani & Polao', 'বিরিয়ানি ও পোলাও', 'Biryani & Traditional Meals', 'ঐতিহ্যবাহী বিরিয়ানি ও পোলাও', 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80', 1, false),
+  ('cat_rice', 'rice-meals', 'Rice & Curries', 'ভাত ও তরকারি', 'Daily traditional meals', 'প্রতিদিনের ভাত ও তরকারি', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80', 2, false),
+  ('cat_fastfood', 'fast-food', 'Burgers & Fast Food', 'বার্গার ও ফাস্টফুড', 'Burgers, chicken and snacks', 'বার্গার ও ফাস্টফুড', 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80', 3, false),
+  ('cat_snacks', 'snacks', 'Evening Snacks', 'সান্ধ্যকালীন নাশতা', 'Tea snacks and evening items', 'সান্ধ্যকালীন নাশতা', 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80', 4, false),
+  ('cat_cakes', 'cakes', 'Homemade Cakes', 'হোমমেড কেক', 'Custom cakes and bakery', 'হোমমেড কেক ও বেকারি', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 5, true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Initial default delivery zones (Admin can change fees anytime in Admin Panel -> Pricing)
