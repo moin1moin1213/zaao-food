@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 declare global {
   var __pengu_otp_cache: Map<string, { code: string; expiresAt: number }> | undefined;
@@ -8,7 +9,7 @@ const otpStore = global.__pengu_otp_cache || new Map();
 
 export async function POST(req: NextRequest) {
   try {
-    const { phone, otp } = await req.json();
+    const { phone, otp, fullName } = await req.json();
 
     if (!phone || !otp) {
       return NextResponse.json(
@@ -17,8 +18,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const cleanDigits = phone.replace(/[\s-]/g, "");
+    const localPhone = cleanDigits.endsWith(cleanDigits.slice(-11)) && cleanDigits.slice(-11).startsWith("01")
+      ? cleanDigits.slice(-11)
+      : cleanDigits;
+
     const trimmedOtp = String(otp).trim();
-    const record = otpStore.get(phone);
+    const record = otpStore.get(localPhone);
 
     if (!record) {
       return NextResponse.json(
@@ -32,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (Date.now() > record.expiresAt) {
-      otpStore.delete(phone);
+      otpStore.delete(localPhone);
       return NextResponse.json(
         {
           success: false,
@@ -55,10 +61,34 @@ export async function POST(req: NextRequest) {
     }
 
     // Code matches! Consume it so it cannot be re-used
-    otpStore.delete(phone);
+    otpStore.delete(localPhone);
+
+    // Sync to Supabase customers table if configured
+    let customerRecord = null;
+    if (supabaseAdmin) {
+      try {
+        const { data: upserted } = await supabaseAdmin
+          .from("customers")
+          .upsert(
+            {
+              phone: localPhone,
+              full_name: fullName || "PenguFood Customer",
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "phone" }
+          )
+          .select()
+          .single();
+
+        customerRecord = upserted;
+      } catch (dbErr) {
+        console.warn("Could not upsert customer to Supabase:", dbErr);
+      }
+    }
 
     return NextResponse.json({
       success: true,
+      customer: customerRecord,
       messageEn: "Mobile number verified successfully.",
       messageBn: "মোবাইল নম্বর সফলভাবে যাচাই হয়েছে।",
     });
