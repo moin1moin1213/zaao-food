@@ -106,9 +106,10 @@ export default function CheckoutPage() {
     } catch (err: any) {
       console.error("Order submission failed:", err);
       setErrorMsg(
-        lang === "bn"
+        err.message ||
+        (lang === "bn"
           ? "অর্ডার প্রসেস করার সময় একটি সমস্যা হয়েছে।"
-          : "An error occurred while creating order."
+          : "An error occurred while creating order.")
       );
     } finally {
       setIsSubmitting(false);

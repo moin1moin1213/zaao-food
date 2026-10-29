@@ -26,26 +26,42 @@ export async function POST(req: Request) {
       );
     }
 
-    // Fetch dynamic PBKDF2 hashed passwords set by Admin in Supabase
-    let livePasswords: Record<string, string> = {};
+    // Fetch dynamic PBKDF2 hashed password from restaurant_staff table or app_settings fallback
+    let storedHash: string | undefined;
     if (supabaseAdmin) {
       try {
-        const { data: settingsData } = await supabaseAdmin
-          .from("app_settings")
-          .select("value")
-          .eq("key", "restaurant_passwords")
+        const { data: staffData } = await supabaseAdmin
+          .from("restaurant_staff")
+          .select("password_hash")
+          .eq("login_id", targetRest.id)
+          .eq("is_active", true)
           .single();
 
-        if (settingsData && settingsData.value) {
-          livePasswords = settingsData.value;
+        if (staffData && staffData.password_hash) {
+          storedHash = staffData.password_hash;
         }
       } catch (err) {
-        console.warn("Could not fetch restaurant passwords from Supabase:", err);
+        // Table might not exist yet before migration
+      }
+
+      if (!storedHash) {
+        try {
+          const { data: settingsData } = await supabaseAdmin
+            .from("app_settings")
+            .select("value")
+            .eq("key", "restaurant_passwords")
+            .single();
+
+          if (settingsData && settingsData.value) {
+            storedHash = settingsData.value[targetRest.id];
+          }
+        } catch (err) {
+          console.warn("Could not fetch restaurant passwords from Supabase:", err);
+        }
       }
     }
 
     // Verify password against secure PBKDF2 SHA-512 hash
-    const storedHash = livePasswords[targetRest.id];
     let isMatch = false;
 
     if (storedHash) {

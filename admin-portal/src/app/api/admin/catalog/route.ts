@@ -257,6 +257,24 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: error.message }, { status: 400 });
         }
 
+        // Sync securely to normalized restaurant_staff table
+        try {
+          await supabaseAdmin.from("restaurant_staff").upsert(
+            {
+              restaurant_id: restaurantId,
+              login_id: restaurantId,
+              full_name: `${restaurantId} কিচেন ইনচার্জ`,
+              password_hash: secureHashed,
+              can_change_password: false,
+              role: "kitchen_manager",
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "login_id" }
+          );
+        } catch (syncErr) {
+          console.warn("Could not sync to restaurant_staff table (may not exist yet):", syncErr);
+        }
+
         // Return temporary plaintext ONCE upon successful reset so Admin can copy it to the owner
         return NextResponse.json({
           success: true,

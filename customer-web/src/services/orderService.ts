@@ -119,14 +119,49 @@ export const orderService = {
     customer: OrderCustomer;
     pricing: OrderPricing;
     paymentMethod: "cod" | "online";
+    couponCode?: string;
   }): Promise<Order> {
+    // 1. Prioritize Secure Server-Side Order Creation & Validation
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: params.items,
+          customer: params.customer,
+          paymentMethod: params.paymentMethod,
+          couponCode: params.couponCode,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "অর্ডার প্রক্রিয়াকরণে সমস্যা হয়েছে।");
+      }
+
+      if (data.success && data.order) {
+        // Cache to local storage for offline history
+        const currentOrders = safeLocalStorageGet<Order[]>(ORDERS_STORAGE_KEY, []) || [];
+        const updated = [data.order, ...currentOrders.filter((o) => o.id !== data.order.id)];
+        safeLocalStorageSet(ORDERS_STORAGE_KEY, updated);
+        return data.order;
+      }
+    } catch (err: any) {
+      if (err.message && !err.message.includes("fetch")) {
+        // Validation error from server (e.g. out of zone, store closed)
+        throw err;
+      }
+      console.warn("Server order API unreachable, attempting offline local creation:", err);
+    }
+
+    // 2. Offline / Demo Fallback Mode
     const orderNum = Math.floor(10000 + Math.random() * 90000);
     const newOrder: Order = {
       id: `PF-${orderNum}`,
       createdAt: new Date().toISOString(),
       status: "placed",
       items: params.items,
-      restaurantId: params.items[0]?.restaurantId || "rest_1",
+      restaurantId: params.items[0]?.restaurantId || "rest-1",
       restaurantNameEn: params.items[0]?.restaurantNameEn || "PenguFood Kitchen",
       restaurantNameBn: params.items[0]?.restaurantNameBn || "পেঙ্গুফুড কিচেন",
       restaurantPhone: "+880 1711-223344",
@@ -138,57 +173,7 @@ export const orderService = {
       rider: undefined,
     };
 
-    // Save to Supabase if configured
-    if (supabase && isSupabaseConfigured) {
-      try {
-        const { error } = await supabase.from("orders").insert({
-          id: newOrder.id,
-          created_at: newOrder.createdAt,
-          status: newOrder.status,
-          restaurant_id: newOrder.restaurantId,
-          restaurant_name_en: newOrder.restaurantNameEn,
-          restaurant_name_bn: newOrder.restaurantNameBn,
-          restaurant_phone: newOrder.restaurantPhone,
-          customer_name: newOrder.customer.name,
-          customer_phone: newOrder.customer.phone,
-          customer_address: newOrder.customer.address,
-          customer_area: newOrder.customer.area,
-          customer_instructions: newOrder.customer.instructions,
-          customer_lat: newOrder.customer.latitude,
-          customer_lng: newOrder.customer.longitude,
-          items: newOrder.items,
-          subtotal: newOrder.pricing.subtotal,
-          delivery_fee: newOrder.pricing.deliveryFee,
-          discount: newOrder.pricing.discount,
-          total: newOrder.pricing.total,
-          payment_method: newOrder.paymentMethod,
-          payment_status: newOrder.paymentStatus,
-          estimated_delivery_minutes: newOrder.estimatedDeliveryMinutes,
-        });
-
-        if (error) {
-          console.warn("Supabase order insert warning:", error);
-        } else {
-          // Increment sales count for each product in this order
-          for (const item of newOrder.items) {
-            if (item.productId) {
-              try {
-                await supabase.rpc("increment_sales_count", {
-                  prod_id: item.productId,
-                  qty: item.quantity || 1,
-                });
-              } catch (rpcErr) {
-                // Silently ignore if rpc not created yet
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.warn("Supabase order insert failed, saved locally:", err);
-      }
-    }
-
-    // Save to local storage cache as well
+    // Save to local storage cache
     const currentOrders = safeLocalStorageGet<Order[]>(ORDERS_STORAGE_KEY, []) || [];
     const updated = [newOrder, ...currentOrders];
     safeLocalStorageSet(ORDERS_STORAGE_KEY, updated);
